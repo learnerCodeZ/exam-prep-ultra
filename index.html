@@ -8,16 +8,14 @@
 </head>
 <body>
 <div class="header">
-  <div style="display:flex;align-items:center;gap:8px">
-    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="打开题库菜单">☰</button>
     <div>
       <h1>期末刷题宝典</h1>
       <div class="sub-info" id="hdrSub">加载中...</div>
     </div>
   </div>
   <div class="header-right">
-    <select class="bank-select" id="bankSelect" onchange="switchBank(this.value)"></select>
-    <button class="btn-del" id="btnDelBank" onclick="deleteBankUI(document.getElementById('bankSelect').value)" title="删除当前题库" style="display:none">✕</button>
     <button class="btn-import" onclick="openImport()">+ 导入</button>
   </div>
 </div>
@@ -28,12 +26,19 @@
 <!-- 侧栏 -->
 <div class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h3>题库列表</h3>
-    <button class="menu-btn" onclick="toggleSidebar()">✕</button>
+    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> 题库</h3>
+    <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
   </div>
   <div class="sidebar-body">
+    <div class="sidebar-section-label">题库列表</div>
     <div class="sidebar-banks" id="sidebarBanks"></div>
-    <button class="sidebar-import" onclick="openImport();toggleSidebar()">+ 导入题库</button>
+    <button class="sidebar-import" onclick="openImport();toggleSidebar()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      导入题库
+    </button>
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-stats" id="sidebarStats"></div>
   </div>
 </div>
 

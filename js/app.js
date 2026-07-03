@@ -127,11 +127,20 @@ function renderBankSelect() {
     html += renderBankItem(b.id, b.name, b.questions ? b.questions.length : 0, activeId === b.id, true);
   }
   container.innerHTML = html;
+  // 侧栏底部统计
+  const stats = document.getElementById('sidebarStats');
+  if (stats) {
+    const right = Object.keys(state.right).length;
+    const wrong = Object.keys(state.wrong).length;
+    stats.textContent = `答对 ${right} 道 · 错题 ${wrong} 道 · 共 ${state.questions.length} 题`;
+  }
 }
 
 function renderBankItem(id, name, count, isActive, deletable) {
+  const iconChar = isActive ? '📖' : (id === 'default' ? '📚' : '📘');
   return `<div class="sidebar-bank-item ${isActive?'active':''}" onclick="switchBank('${id}')">
-    <div>
+    <div class="bank-icon">${iconChar}</div>
+    <div class="bank-info">
       <div class="bank-name">${escapeHtml(name)}</div>
       <div class="bank-count">${count} 题</div>
     </div>
@@ -140,15 +149,23 @@ function renderBankItem(id, name, count, isActive, deletable) {
 }
 
 function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-  document.getElementById('sidebarOverlay').classList.toggle('show');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('show');
 }
+
+// ESC 关闭侧栏
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar.classList.contains('open')) toggleSidebar();
+  }
+});
 
 async function switchBank(bankId) {
   localStorage.setItem(LS.activeBank, bankId);
-  // 切换题库后关闭侧栏
-  document.getElementById('sidebar').classList.remove('open');
-  document.getElementById('sidebarOverlay').classList.remove('show');
+  toggleSidebar(); // 关闭侧栏
   await loadBank(bankId);
 }
 
