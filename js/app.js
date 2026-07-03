@@ -142,6 +142,7 @@ function renderBankItem(id, name, count, isActive, deletable) {
       <div class="bank-count">${count} 题</div>
     </div>
     ${canRename ? `<button class="bank-rename" onclick="event.stopPropagation();startRename('${id}','${escapeHtml(name)}')" title="重命名">✎</button>` : ''}
+    <button class="bank-append" onclick="event.stopPropagation();openAppend('${id}')" title="追加题目">+</button>
     ${deletable ? `<button class="bank-del" onclick="event.stopPropagation();deleteBankUI('${id}')">✕</button>` : ''}
   </div>`;
 }
@@ -594,6 +595,14 @@ let pendingBank = null;
 function openImport() {
   resetImportForm();
   populateImportTarget();
+  document.getElementById('importOverlay').classList.add('show');
+  document.getElementById('importFile').addEventListener('change', onFileSelect, { once: true });
+}
+
+function openAppend(bankId) {
+  resetImportForm();
+  populateImportTarget();
+  document.getElementById('importTarget').value = bankId;
   document.getElementById('importOverlay').classList.add('show');
   document.getElementById('importFile').addEventListener('change', onFileSelect, { once: true });
 }

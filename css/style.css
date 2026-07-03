@@ -124,6 +124,13 @@ body {
 }
 .sidebar-bank-item:hover .bank-rename { display: flex; }
 .sidebar-bank-item .bank-rename:hover { background: #e8f3ff; color: #1a73e8; }
+.sidebar-bank-item .bank-append {
+  width: 24px; height: 24px; display: none; align-items: center; justify-content: center;
+  border: none; background: transparent; border-radius: 4px; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: #bbb; flex-shrink: 0;
+}
+.sidebar-bank-item:hover .bank-append { display: flex; }
+.sidebar-bank-item .bank-append:hover { background: #e8ffe8; color: #52c41a; }
 
 /* Sidebar import button */
 .sidebar-import {
