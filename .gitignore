@@ -1,6 +1,5 @@
 node_modules/
 .claude/
-notes/
 Temp/
 *.pyc
 __pycache__
