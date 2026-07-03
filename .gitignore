@@ -1,6 +1,7 @@
 node_modules/
 .claude/
 notes/
+Temp/
 *.pyc
 __pycache__
 .DS_Store
