@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>期末刷题宝典</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: #f0f2f5; color: #333; line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.header {
+  background: linear-gradient(135deg, #4a90d9, #357abd);
+  color: #fff; padding: 14px 16px;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.header h1 { font-size: 18px; font-weight: 600; }
+.header .sub { font-size: 12px; opacity: 0.85; margin-top: 2px; }
+.container { max-width: 800px; margin: 0 auto; padding: 12px; }
+
+.tabs {
+  display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap;
+}
+.tab {
+  flex: 1; min-width: 90px; padding: 10px 6px;
+  background: #fff; border: 2px solid #e0e0e0; border-radius: 8px;
+  text-align: center; cursor: pointer; font-size: 13px; font-weight: 500;
+  transition: all 0.2s; color: #555;
+}
+.tab.active { border-color: #4a90d9; color: #4a90d9; background: #ebf3fc; }
+.tab .count { display: block; font-size: 11px; color: #999; font-weight: 400; margin-top: 2px; }
+.tab.active .count { color: #4a90d9; }
+
+.toolbar {
+  display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; align-items: center;
+}
+.toolbar select, .toolbar button {
+  padding: 8px 12px; border: 1px solid #d0d0d0; border-radius: 6px;
+  background: #fff; font-size: 13px; cursor: pointer;
+}
+.toolbar button.primary { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+.toolbar button:hover { background: #f5f5f5; }
+.toolbar button.primary:hover { background: #357abd; }
+.progress-info { font-size: 13px; color: #666; margin-left: auto; }
+
+.card {
+  background: #fff; border-radius: 10px; padding: 16px;
+  margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.q-tag {
+  display: inline-block; background: #e8f0fe; color: #4a90d9;
+  padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-bottom: 8px;
+}
+.q-stem { font-size: 15px; margin-bottom: 14px; font-weight: 500; line-height: 1.7; }
+.q-stem .zh { color: #888; font-size: 13px; font-weight: 400; display: block; margin-top: 4px; }
+
+.passage-box {
+  background: #f9f9f7; border-left: 3px solid #d0c8a0;
+  padding: 10px 12px; margin-bottom: 14px; font-size: 13px;
+  max-height: 300px; overflow-y: auto; line-height: 1.8;
+}
+.passage-box.collapsed { max-height: 80px; }
+.passage-toggle {
+  display: inline-block; color: #4a90d9; cursor: pointer;
+  font-size: 12px; margin-bottom: 8px;
+}
+
+.options { display: flex; flex-direction: column; gap: 8px; }
+.option {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 12px; border: 2px solid #e8e8e8; border-radius: 8px;
+  cursor: pointer; transition: all 0.15s; font-size: 14px;
+}
+.option:hover { border-color: #b0d0f0; background: #f8fbff; }
+.option.selected { border-color: #4a90d9; background: #ebf3fc; }
+.option.correct { border-color: #52c41a; background: #f0fae8; }
+.option.wrong { border-color: #f5222d; background: #fff1f0; }
+.option .letter {
+  flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%;
+  background: #f0f0f0; color: #666; display: flex;
+  align-items: center; justify-content: center; font-weight: 600; font-size: 13px;
+}
+.option.selected .letter { background: #4a90d9; color: #fff; }
+.option.correct .letter { background: #52c41a; color: #fff; }
+.option.wrong .letter { background: #f5222d; color: #fff; }
+.option .opt-text { flex: 1; padding-top: 2px; }
+
+.answer-box {
+  margin-top: 12px; padding: 10px 12px; border-radius: 6px;
+  font-size: 13px; display: none;
+}
+.answer-box.show { display: block; }
+.answer-box.correct { background: #f0fae8; color: #389e0d; }
+.answer-box.wrong { background: #fff1f0; color: #cf1322; }
+.answer-box .label { font-weight: 600; }
+
+.actions { display: flex; gap: 8px; margin-top: 12px; }
+.actions button {
+  flex: 1; padding: 9px; border: none; border-radius: 6px;
+  font-size: 13px; cursor: pointer; font-weight: 500;
+}
+.btn-confirm { background: #4a90d9; color: #fff; }
+.btn-next { background: #52c41a; color: #fff; }
+.btn-fav { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591 !important; }
+.actions button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.empty { text-align: center; padding: 40px; color: #999; font-size: 14px; }
+
+.nav-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 10px; padding: 8px 0;
+}
+.nav-bar button {
+  padding: 8px 16px; border: 1px solid #d0d0d0; border-radius: 6px;
+  background: #fff; cursor: pointer; font-size: 13px;
+}
+.nav-bar button:disabled { opacity: 0.4; cursor: not-allowed; }
+.nav-pos { font-size: 13px; color: #666; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.nav-pos:hover { color: #4a90d9; }
+
+.qmap-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4); z-index: 200;
+  display: none; align-items: center; justify-content: center;
+}
+.qmap-overlay.show { display: flex; }
+.qmap-panel {
+  background: #fff; border-radius: 12px; padding: 16px;
+  max-width: 420px; width: 90%; max-height: 70vh; overflow-y: auto;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+}
+.qmap-panel h3 { font-size: 15px; margin-bottom: 10px; text-align: center; }
+.qmap-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: 6px;
+}
+.qmap-item {
+  padding: 8px 4px; text-align: center; border-radius: 6px;
+  font-size: 13px; cursor: pointer; border: 1px solid #e8e8e8;
+  transition: all 0.15s;
+}
+.qmap-item:hover { border-color: #4a90d9; color: #4a90d9; }
+.qmap-item.current { background: #4a90d9; color: #fff; border-color: #4a90d9; font-weight: 600; }
+.qmap-item.done-right { background: #f0fae8; color: #389e0d; border-color: #b7eb8f; }
+.qmap-item.done-wrong { background: #fff1f0; color: #cf1322; border-color: #ffa39e; }
+.qmap-close {
+  display: block; margin: 12px auto 0; padding: 6px 20px;
+  border: 1px solid #d0d0d0; border-radius: 6px; background: #fff;
+  cursor: pointer; font-size: 13px;
+}
+
+/* Fill blank specific */
+.fill-passage { font-size: 14px; line-height: 2; margin-bottom: 14px; }
+.fill-passage .blank {
+  display: inline-block; min-width: 60px; padding: 1px 8px;
+  margin: 0 2px; border-bottom: 2px solid #4a90d9;
+  background: #f8fbff; border-radius: 3px; font-weight: 600; color: #4a90d9;
+}
+.fill-passage .blank.filled { background: #f0fae8; color: #389e0d; border-color: #52c41a; }
+.fill-passage .blank.wrong { background: #fff1f0; color: #cf1322; border-color: #f5222d; }
+
+.word-bank {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;
+  padding: 10px; background: #f9f9f7; border-radius: 6px;
+}
+.word-chip {
+  padding: 4px 10px; background: #fff; border: 1px solid #d9d9d9;
+  border-radius: 14px; font-size: 12px; cursor: pointer;
+  transition: all 0.15s;
+}
+.word-chip:hover { border-color: #4a90d9; color: #4a90d9; }
+.word-chip.used { opacity: 0.3; pointer-events: none; text-decoration: line-through; }
+
+.match-options {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+  gap: 6px; margin-bottom: 14px;
+}
+.match-opt {
+  padding: 8px; text-align: center; border: 2px solid #e8e8e8;
+  border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;
+  transition: all 0.15s;
+}
+.match-opt:hover { border-color: #b0d0f0; }
+.match-opt.selected { border-color: #4a90d9; background: #ebf3fc; color: #4a90d9; }
+.match-opt.correct { border-color: #52c41a; background: #f0fae8; color: #389e0d; }
+.match-opt.wrong { border-color: #f5222d; background: #fff1f0; color: #cf1322; }
+
+.stats-row {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.stat-card {
+  flex: 1; background: #fff; border-radius: 8px; padding: 10px;
+  text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.stat-card .num { font-size: 20px; font-weight: 700; }
+.stat-card .lbl { font-size: 11px; color: #999; margin-top: 2px; }
+.stat-card.right .num { color: #52c41a; }
+.stat-card.wrong .num { color: #f5222d; }
+.stat-card.total .num { color: #4a90d9; }
+
+.mode-tabs { display: flex; gap: 6px; margin-bottom: 12px; }
+.mode-tab {
+  flex: 1; padding: 8px; text-align: center; background: #fff;
+  border: 1px solid #e0e0e0; border-radius: 6px; cursor: pointer; font-size: 13px;
+}
+.mode-tab.active { background: #4a90d9; color: #fff; border-color: #4a90d9; }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>期末刷题宝典</h1>
+  <div class="sub" id="hdrSub">英语期末复习 · 共 0 题</div>
+</div>
+
+<div class="container">
+  <div class="mode-tabs">
+    <div class="mode-tab active" data-mode="practice" onclick="setMode('practice')">顺序练习</div>
+    <div class="mode-tab" data-mode="random" onclick="setMode('random')">随机刷题</div>
+    <div class="mode-tab" data-mode="wrong" onclick="setMode('wrong')">错题本</div>
+    <div class="mode-tab" data-mode="fav" onclick="setMode('fav')">收藏夹</div>
+  </div>
+
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card total"><div class="num" id="stTotal">0</div><div class="lbl">总题数</div></div>
+    <div class="stat-card right"><div class="num" id="stRight">0</div><div class="lbl">已答对</div></div>
+    <div class="stat-card wrong"><div class="num" id="stWrong">0</div><div class="lbl">错题</div></div>
+    <div class="stat-card"><div class="num" id="stFav">0</div><div class="lbl">收藏</div></div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div id="content"></div>
+</div>
+
+<div class="qmap-overlay" id="qmapOverlay" onclick="closeQmap(event)">
+  <div class="qmap-panel" onclick="event.stopPropagation()">
+    <h3 id="qmapTitle">题目导航</h3>
+    <div class="qmap-grid" id="qmapGrid"></div>
+    <button class="qmap-close" onclick="closeQmap()">关闭</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+const TYPES = {
+  listening: '听力', matching: '段落匹配', fillblank: '选词填空', reading: '阅读'
+};
+let state = {
+  mode: 'practice',
+  type: 'listening',
+  idx: 0,
+  selected: null,
+  answered: false,
+  list: [],
+  wrong: JSON.parse(localStorage.getItem('wrongSet') || '{}'),
+  right: JSON.parse(localStorage.getItem('rightSet') || '{}'),
+  fav: JSON.parse(localStorage.getItem('favSet') || '{}')
+};
+
+function init() {
+  // Build type tabs
+  const tabs = document.getElementById('tabs');
+  let html = '';
+  let firstType = null;
+  for (const t of Object.keys(TYPES)) {
+    const items = QUESTIONS.filter(q => q.type === t);
+    if (items.length === 0) continue;
+    if (!firstType) firstType = t;
+    html += `<div class="tab" data-type="${t}" onclick="switchType('${t}')">
+      ${TYPES[t]}<span class="count">${items.length}题</span></div>`;
+  }
+  tabs.innerHTML = html;
+  document.getElementById('hdrSub').textContent = `英语期末复习 · 共 ${QUESTIONS.length} 题`;
+  state.type = firstType;
+  buildList();
+  updateStats();
+}
+
+function buildList() {
+  let arr = QUESTIONS.filter(q => q.type === state.type);
+  if (state.mode === 'wrong') {
+    arr = arr.filter(q => state.wrong[q.id]);
+  } else if (state.mode === 'fav') {
+    arr = arr.filter(q => state.fav[q.id]);
+  } else if (state.mode === 'random') {
+    arr = [...arr].sort(() => Math.random() - 0.5);
+  }
+  state.list = arr;
+  state.idx = 0;
+  state.selected = null;
+  state.answered = false;
+  render();
+}
+
+function setMode(m) {
+  state.mode = m;
+  document.querySelectorAll('.mode-tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.mode === m);
+  });
+  buildList();
+}
+
+function switchType(t) {
+  state.type = t;
+  document.querySelectorAll('.tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.type === t);
+  });
+  buildList();
+}
+
+function updateStats() {
+  document.getElementById('stTotal').textContent = QUESTIONS.length;
+  document.getElementById('stRight').textContent = Object.keys(state.right).length;
+  document.getElementById('stWrong').textContent = Object.keys(state.wrong).length;
+  document.getElementById('stFav').textContent = Object.keys(state.fav).length;
+  // active tab
+  document.querySelectorAll('.tab').forEach(el => {
+    el.classList.toggle('active', el.dataset.type === state.type);
+  });
+}
+
+function render() {
+  const content = document.getElementById('content');
+  if (state.list.length === 0) {
+    content.innerHTML = `<div class="empty">${
+      state.mode === 'wrong' ? '错题本为空，快去刷题吧！' :
+      state.mode === 'fav' ? '收藏夹为空' : '暂无题目'
+    }</div>`;
+    return;
+  }
+  const q = state.list[state.idx];
+  if (q.type === 'fillblank') renderFillBlank(q, content);
+  else renderChoice(q, content);
+  updateStats();
+}
+
+function renderChoice(q, content) {
+  let passageHtml = '';
+  if (q.type === 'matching' && q.passages) {
+    const fullText = Object.entries(q.passages).map(([k,v]) => `<b>${k}.</b> ${v}`).join('<br><br>');
+    passageHtml = `
+      <div class="passage-toggle" onclick="togglePassage(this)">展开/收起原文 ▾</div>
+      <div class="passage-box collapsed" id="passageBox">${fullText}</div>`;
+  }
+
+  let stemHtml = q.stem;
+  if (q.type === 'listening') {
+    stemHtml = `<b>第 ${q.number} 题</b>`;
+  }
+
+  let optionsHtml = '';
+  if (q.type === 'matching') {
+    // letter grid
+    const letters = q.options.map(o => o.letter);
+    optionsHtml = `<div class="match-options" id="matchOpts">` +
+      letters.map(l => `<div class="match-opt" data-l="${l}" onclick="selectMatch('${l}')">${l}</div>`).join('') +
+      `</div>`;
+  } else {
+    optionsHtml = `<div class="options">` +
+      q.options.map(o => `
+        <div class="option" data-l="${o.letter}" onclick="selectOpt('${o.letter}')">
+          <div class="letter">${o.letter}</div>
+          <div class="opt-text">${o.text}</div>
+        </div>`).join('') + `</div>`;
+  }
+
+  const isFav = state.fav[q.id];
+  content.innerHTML = `
+    <div class="card">
+      <span class="q-tag">${q.typeName}${q.number ? ' · 第'+q.number+'题' : ''}${q.passage?' · Passage '+q.passage:''}</span>
+      ${passageHtml}
+      <div class="q-stem">${stemHtml}</div>
+      ${optionsHtml}
+      <div class="answer-box" id="answerBox"></div>
+      <div class="actions">
+        <button class="btn-next" onclick="nextQ()">下一题</button>
+        <button class="btn-fav" onclick="toggleFav()">${isFav?'★ 收藏中':'☆ 收藏'}</button>
+      </div>
+      <div class="nav-bar">
+        <button onclick="prevQ()" ${state.idx===0?'disabled':''}>上一题</button>
+        <span class="nav-pos" onclick="openQmap()">${state.idx+1} / ${state.list.length}</span>
+        <button onclick="nextQ()" ${state.idx===state.list.length-1?'disabled':''}>下一题</button>
+      </div>
+    </div>`;
+
+  if (state.answered && state.selected) {
+    showResult(q);
+  }
+}
+
+let fillState = { blanks: {}, used: {} };
+
+function renderFillBlank(q, content) {
+  // parse passage - blanks marked with __X)__ or number+letter patterns
+  // We reconstruct: show passage with blanks where answers are
+  const blanks = q.blanks || {};
+  const blankLetters = Object.keys(blanks);
+  // Build passage with blank placeholders
+  let passage = q.passage;
+  // Replace patterns like 26C) word or _E) word_ with blank
+  // First, extract answers from passage using regex on the raw passage
+  const ansMap = {};
+  const rawPassage = q.passage;
+  // Pattern: number followed by letter) e.g. 26C) or _K) recommendation _
+  const pat1 = /(\d+)([A-O])\)/g;
+  let m;
+  // Actually we need to find answer words. The docx has inline answers like "26C) chance" or "__E) glamorous__"
+  // Let's extract: number+letter+)+word
+  const answers = {};
+  const wordByLetter = {};
+  q.wordBank.forEach(w => wordByLetter[w.letter] = w.text);
+
+  // Find all inline answers in passage: pattern (digits)(Letter)) optionally followed by a word
+  const ansPat = /(\d+)([A-O])\)\s*(\w+)/g;
+  let mm;
+  let cleanPassage = rawPassage;
+  const foundBlanks = [];
+  while ((mm = ansPat.exec(rawPassage)) !== null) {
+    const num = mm[1], letter = mm[2], word = mm[3];
+    answers[num] = { letter, word };
+    foundBlanks.push({ num, letter, word, idx: mm.index, full: mm[0] });
+  }
+  // Sort by position desc to replace from end
+  foundBlanks.sort((a,b) => b.idx - a.idx);
+  for (const fb of foundBlanks) {
+    cleanPassage = cleanPassage.slice(0, fb.idx) + `【${fb.num}】` + cleanPassage.slice(fb.idx + fb.full.length);
+  }
+
+  fillState = { answers, current: {}, used: {} };
+
+  const isFav = state.fav[q.id];
+  content.innerHTML = `
+    <div class="card">
+      <span class="q-tag">${q.unit} · 选词填空</span>
+      <div class="word-bank" id="wordBank">
+        ${q.wordBank.map(w => `<div class="word-chip" data-l="${w.letter}" onclick="useWord('${w.letter}')">${w.letter}. ${w.text}</div>`).join('')}
+      </div>
+      <div class="fill-passage" id="fillPassage">${renderFillPassage(cleanPassage, answers)}</div>
+      <div class="answer-box" id="answerBox"></div>
+      <div class="actions">
+        <button class="btn-next" onclick="nextQ()">下一题</button>
+        <button class="btn-fav" onclick="toggleFav()">${isFav?'★ 收藏中':'☆ 收藏'}</button>
+      </div>
+      <div class="nav-bar">
+        <button onclick="prevQ()" ${state.idx===0?'disabled':''}>上一题</button>
+        <span class="nav-pos" onclick="openQmap()">${state.idx+1} / ${state.list.length}</span>
+        <button onclick="nextQ()" ${state.idx===state.list.length-1?'disabled':''}>下一题</button>
+      </div>
+    </div>`;
+}
+
+function renderFillPassage(passage, answers) {
+  // Replace 【num】 with clickable blank
+  return passage.replace(/【(\d+)】/g, (match, num) => {
+    return `<span class="blank" data-num="${num}" onclick="clearBlank('${num}')" title="点击清除">___</span>`;
+  });
+}
+
+function useWord(letter) {
+  if (state.answered) return;
+  const blanks = document.querySelectorAll('#fillPassage .blank:not(.filled)');
+  if (blanks.length === 0) return;
+  const target = blanks[0];
+  const num = target.dataset.num;
+  fillState.current[num] = letter;
+  target.textContent = letter;
+  target.classList.add('filled');
+  document.querySelector(`.word-chip[data-l="${letter}"]`).classList.add('used');
+  // Check if all blanks filled
+  const allFilled = document.querySelectorAll('#fillPassage .blank:not(.filled)').length === 0;
+  if (allFilled) confirmFill();
+}
+
+function clearBlank(num) {
+  if (state.answered) return;
+  const el = document.querySelector(`.blank[data-num="${num}"]`);
+  const letter = fillState.current[num];
+  if (letter) {
+    delete fillState.current[num];
+    el.textContent = '___';
+    el.classList.remove('filled');
+    const chip = document.querySelector(`.word-chip[data-l="${letter}"]`);
+    if (chip) chip.classList.remove('used');
+  }
+}
+
+function confirmFill() {
+  if (state.answered) return;
+  const answers = fillState.answers;
+  let correct = 0, total = 0;
+  for (const num in answers) {
+    total++;
+    const el = document.querySelector(`.blank[data-num="${num}"]`);
+    const userLetter = fillState.current[num];
+    const correctLetter = answers[num].letter;
+    if (userLetter === correctLetter) {
+      el.classList.add('correct');
+      el.textContent = userLetter + '(' + answers[num].word + ')';
+      correct++;
+    } else {
+      el.classList.add('wrong');
+      el.textContent = (userLetter||'空') + ' → ' + correctLetter + '(' + answers[num].word + ')';
+    }
+  }
+  state.answered = true;
+  const allRight = correct === total;
+  const box = document.getElementById('answerBox');
+  box.className = 'answer-box show ' + (allRight ? 'correct' : 'wrong');
+  box.innerHTML = `<span class="label">${allRight?'全对！':'部分正确'}</span> 答对 ${correct}/${total} 空`;
+
+  if (allRight) { state.right[state.list[state.idx].id] = true; delete state.wrong[state.list[state.idx].id]; }
+  else state.wrong[state.list[state.idx].id] = true;
+  saveState();
+  updateStats();
+}
+
+function selectOpt(letter) {
+  if (state.answered) return;
+  state.selected = letter;
+  state.answered = true;
+  showResult(state.list[state.idx]);
+}
+
+function selectMatch(letter) {
+  if (state.answered) return;
+  state.selected = letter;
+  state.answered = true;
+  showResult(state.list[state.idx]);
+}
+
+function showResult(q) {
+  const correct = state.selected === q.answer;
+  // mark options
+  if (q.type === 'matching') {
+    document.querySelectorAll('.match-opt').forEach(el => {
+      const l = el.dataset.l;
+      el.classList.remove('selected');
+      if (l === q.answer) el.classList.add('correct');
+      else if (l === state.selected) el.classList.add('wrong');
+    });
+  } else {
+    document.querySelectorAll('.option').forEach(el => {
+      const l = el.dataset.l;
+      el.classList.remove('selected');
+      if (l === q.answer) el.classList.add('correct');
+      else if (l === state.selected) el.classList.add('wrong');
+    });
+  }
+  const box = document.getElementById('answerBox');
+  box.className = 'answer-box show ' + (correct ? 'correct' : 'wrong');
+  // Build correct answer detail with translation
+  let detail = '';
+  if (q.answer) {
+    const ansOpt = (q.options || []).find(o => o.letter === q.answer);
+    if (ansOpt) {
+      detail = `${q.answer}. ${ansOpt.text}`;
+      if (ansOpt.zh) detail += `<br><span style="color:#666">译文：${ansOpt.zh}</span>`;
+    } else {
+      detail = q.answer;
+    }
+  } else {
+    detail = '（本题未标注答案）';
+  }
+  box.innerHTML = `<span class="label">${correct?'回答正确！':'回答错误'}</span> 正确答案：${detail}`;
+
+  if (correct) { state.right[q.id] = true; delete state.wrong[q.id]; }
+  else state.wrong[q.id] = true;
+  saveState();
+  updateStats();
+}
+
+function toggleFav() {
+  const q = state.list[state.idx];
+  if (state.fav[q.id]) delete state.fav[q.id];
+  else state.fav[q.id] = true;
+  saveState();
+  render();
+}
+
+function nextQ() {
+  if (state.idx < state.list.length - 1) {
+    state.idx++;
+    state.selected = null;
+    state.answered = false;
+    render();
+  }
+}
+
+function prevQ() {
+  if (state.idx > 0) {
+    state.idx--;
+    state.selected = null;
+    state.answered = false;
+    render();
+  }
+}
+
+function togglePassage(el) {
+  const box = document.getElementById('passageBox');
+  box.classList.toggle('collapsed');
+}
+
+function openQmap() {
+  const overlay = document.getElementById('qmapOverlay');
+  const grid = document.getElementById('qmapGrid');
+  const title = document.getElementById('qmapTitle');
+  const q = state.list[state.idx];
+  title.textContent = q.typeName + ' · 题目导航';
+  let html = '';
+  state.list.forEach((item, idx) => {
+    let cls = 'qmap-item';
+    if (idx === state.idx) cls += ' current';
+    else if (state.right[item.id]) cls += ' done-right';
+    else if (state.wrong[item.id]) cls += ' done-wrong';
+    // Display number
+    let label = idx + 1;
+    if (item.number) label = item.number;
+    html += `<div class="${cls}" onclick="jumpTo(${idx})">${label}</div>`;
+  });
+  grid.innerHTML = html;
+  overlay.classList.add('show');
+}
+
+function closeQmap(e) {
+  if (e && e.target !== document.getElementById('qmapOverlay')) return;
+  document.getElementById('qmapOverlay').classList.remove('show');
+}
+
+function jumpTo(idx) {
+  state.idx = idx;
+  state.selected = null;
+  state.answered = false;
+  document.getElementById('qmapOverlay').classList.remove('show');
+  render();
+}
+
+function saveState() {
+  localStorage.setItem('wrongSet', JSON.stringify(state.wrong));
+  localStorage.setItem('rightSet', JSON.stringify(state.right));
+  localStorage.setItem('favSet', JSON.stringify(state.fav));
+}
+
+init();
+</script>
+</body>
+</html>
