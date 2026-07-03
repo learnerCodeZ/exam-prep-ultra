@@ -80,7 +80,13 @@
       <textarea id="importText" placeholder="将题目内容粘贴到此处，点击下方解析..." style="width:100%;height:120px;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;margin-bottom:8px;resize:vertical;font-family:inherit"></textarea>
       <button onclick="parseImportedText()" style="padding:6px 16px;border:1px solid #4a90d9;background:#ebf3fc;color:#4a90d9;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:10px">解析粘贴内容</button>
       <div id="importStatus" style="display:none;font-size:13px;color:#4a90d9;margin-bottom:8px"></div>
-      <input type="text" id="importName" placeholder="题库名称（可选）" style="width:100%;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;margin-bottom:10px">
+      <input type="text" id="importName" placeholder="题库名称（新题库用）" style="width:100%;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <label style="font-size:13px;white-space:nowrap">导入到：</label>
+        <select id="importTarget" style="flex:1;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px">
+          <option value="__new__">新建题库</option>
+        </select>
+      </div>
       <div id="importPreview" style="display:none"></div>
       <div id="importActions" style="display:none;margin-top:10px">
         <button onclick="confirmImport()" style="padding:8px 20px;background:#4a90d9;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">确认导入</button>

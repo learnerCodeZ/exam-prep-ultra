@@ -593,8 +593,20 @@ let pendingBank = null;
 
 function openImport() {
   resetImportForm();
+  populateImportTarget();
   document.getElementById('importOverlay').classList.add('show');
   document.getElementById('importFile').addEventListener('change', onFileSelect, { once: true });
+}
+
+function populateImportTarget() {
+  const sel = document.getElementById('importTarget');
+  const banks = getUserBanks();
+  let html = '<option value="__new__">新建题库</option>';
+  html += '<option value="default">大学英语4（默认）</option>';
+  for (const b of banks) {
+    html += `<option value="${b.id}">${escapeHtml(b.name)}</option>`;
+  }
+  sel.innerHTML = html;
 }
 
 function resetImportForm() {
@@ -707,6 +719,11 @@ function showImportPreview(bank) {
   }
   html += `</div>`;
   preview.innerHTML = html;
+  // 根据目标更新按钮文案
+  const targetId = document.getElementById('importTarget').value;
+  const btn = document.querySelector('#importActions button');
+  if (targetId === '__new__') btn.textContent = '确认导入';
+  else btn.textContent = '追加题目';
   document.getElementById('importActions').style.display = 'block';
 }
 
@@ -715,10 +732,47 @@ function confirmImport() {
     alert('没有可导入的题目');
     return;
   }
-  saveUserBank(pendingBank);
-  localStorage.setItem(LS.activeBank, pendingBank.id);
-  closeImport();
-  loadBank(pendingBank.id);
+  const targetId = document.getElementById('importTarget').value;
+  if (targetId === '__new__') {
+    saveUserBank(pendingBank);
+    localStorage.setItem(LS.activeBank, pendingBank.id);
+    closeImport();
+    loadBank(pendingBank.id);
+  } else {
+    appendToBank(targetId, pendingBank.questions);
+  }
+}
+
+function appendToBank(bankId, newQuestions) {
+  if (bankId === 'default') {
+    // 追加到默认题库：更新 state 并保存到 npoint 缓存
+    state.questions = state.questions.concat(newQuestions);
+    state.bank.questions = state.questions;
+    const cached = JSON.stringify(state.bank);
+    localStorage.setItem(LS.cacheBank('default'), cached);
+    // 刷新 UI
+    buildList();
+    renderTabs();
+    renderBankSelect();
+    updateHeader();
+    updateStats();
+    closeImport();
+  } else {
+    const banks = getUserBanks();
+    const bank = banks.find(b => b.id === bankId);
+    if (!bank) { alert('目标题库不存在'); return; }
+    bank.questions = (bank.questions || []).concat(newQuestions);
+    localStorage.setItem(LS.banks, JSON.stringify(banks));
+    // 如果当前正在看这个题库，刷新
+    if (state.bank && state.bank.id === bankId) {
+      closeImport();
+      loadBank(bankId);
+    } else {
+      localStorage.setItem(LS.activeBank, bankId);
+      closeImport();
+      loadBank(bankId);
+    }
+  }
 }
 
 function cancelImport() {
