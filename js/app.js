@@ -599,12 +599,21 @@ function openImport() {
 
 function resetImportForm() {
   document.getElementById('importFile').value = '';
+  document.getElementById('importText').value = '';
   document.getElementById('importName').value = '';
   document.getElementById('importPreview').style.display = 'none';
   document.getElementById('importPreview').innerHTML = '';
   document.getElementById('importActions').style.display = 'none';
   document.getElementById('importStatus').style.display = 'none';
   pendingBank = null;
+}
+
+function parseImportedText() {
+  const text = document.getElementById('importText').value.trim();
+  if (!text) { alert('请先粘贴题目内容'); return; }
+  const name = document.getElementById('importName').value.trim() || '粘贴题库';
+  pendingBank = parseMarkdownBank(text, name);
+  showImportPreview(pendingBank);
 }
 
 function onFileSelect(e) {

@@ -74,8 +74,11 @@
   <div class="modal-panel" onclick="event.stopPropagation()">
     <h3>导入题库</h3>
     <div id="importBody">
-      <p style="font-size:13px;margin-bottom:10px">支持 Markdown (.md)、Word (.docx)、PDF (.pdf) 格式。</p>
+      <p style="font-size:13px;margin-bottom:10px">支持 Markdown (.md)、Word (.docx)、PDF (.pdf) 格式，或直接粘贴文本。</p>
       <input type="file" id="importFile" accept=".md,.docx,.pdf" style="margin-bottom:10px">
+      <div style="font-size:12px;color:#888;margin-bottom:4px">或粘贴文本：</div>
+      <textarea id="importText" placeholder="将题目内容粘贴到此处，点击下方解析..." style="width:100%;height:120px;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;margin-bottom:8px;resize:vertical;font-family:inherit"></textarea>
+      <button onclick="parseImportedText()" style="padding:6px 16px;border:1px solid #4a90d9;background:#ebf3fc;color:#4a90d9;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:10px">解析粘贴内容</button>
       <div id="importStatus" style="display:none;font-size:13px;color:#4a90d9;margin-bottom:8px"></div>
       <input type="text" id="importName" placeholder="题库名称（可选）" style="width:100%;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;margin-bottom:10px">
       <div id="importPreview" style="display:none"></div>
