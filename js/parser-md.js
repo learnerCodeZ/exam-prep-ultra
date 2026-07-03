@@ -27,7 +27,7 @@ function parseMarkdownBank(text, bankName) {
 }
 
 function detectType(title) {
-  const map = { '听力': 'listening', '段落匹配': 'matching', '选词填空': 'fillblank', '阅读': 'reading', '单选': 'singleChoice', '多选': 'singleChoice' };
+  const map = { '听力': 'listening', '段落匹配': 'matching', '选词填空': 'fillblank', '阅读': 'reading', '单选': 'singleChoice', '多选': 'multiChoice', '判断': 'judgment' };
   for (const [kw, type] of Object.entries(map)) {
     if (title.includes(kw)) return type;
   }
@@ -259,21 +259,100 @@ function findAnswer(opts) {
   return ans ? ans.letter : '';
 }
 
+// --- 判断题 ---
+function parseJudgment(content, questions) {
+  const lines = content.split('\n');
+  let cur = null;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    // 跳过标题行：一、判断题 / （一）判断题
+    if (/^[一二三四五六七八九十]+[、．.]|\（[一二三四五六七八九十]+）/.test(line)) continue;
+    // 题号行
+    const qMatch = line.match(/^(\d+)[\.、．]\s*(.+)/);
+    if (qMatch) {
+      if (cur) questions.push(cur);
+      cur = {
+        id: 'pd_' + qMatch[1],
+        type: 'reading',
+        typeName: '判断题',
+        number: parseInt(qMatch[1]),
+        stem: qMatch[2].trim(),
+        options: [{ letter: 'A', text: '对', zh: '' }, { letter: 'B', text: '错', zh: '' }],
+        answer: ''
+      };
+      continue;
+    }
+    if (!cur) continue;
+    // 答案行
+    const ansMatch = line.match(/^(?:正确)?答案[：:]\s*(对|错|√|×|✓|✗|T|F|是|否)/i);
+    if (ansMatch) {
+      const v = ansMatch[1];
+      cur.answer = (/对|√|✓|T|是/i.test(v)) ? 'A' : 'B';
+    }
+  }
+  if (cur) questions.push(cur);
+}
+
+// --- 多选题（题号+题干+选项+独立答案行，答案为多字母）---
+function parseMultiChoice(content, questions) {
+  const lines = content.split('\n');
+  let cur = null;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    // 跳过标题行
+    if (/^[一二三四五六七八九十]+[、．.]|\（[一二三四五六七八九十]+）/.test(line)) continue;
+    // 题号行
+    const qMatch = line.match(/^(\d+)[\.、．]\s*(.+)/);
+    if (qMatch) {
+      if (cur && cur.options.length > 0) questions.push(cur);
+      cur = {
+        id: 'dx_' + qMatch[1],
+        type: 'reading',
+        typeName: '多选题',
+        number: parseInt(qMatch[1]),
+        stem: qMatch[2].trim(),
+        options: [],
+        answer: ''
+      };
+      continue;
+    }
+    if (!cur) continue;
+    // 答案行：支持多字母 CD / BCD
+    const ansMatch = line.match(/^(?:正确)?答案[：:]\s*([A-O]+)/i);
+    if (ansMatch) {
+      cur.answer = ansMatch[1].toUpperCase();
+      continue;
+    }
+    // 选项行（处理答案粘在末尾的情况：D. 格雷码正确答案：CD）
+    const oMatch = line.match(/^([A-O])[\.\)、．]\s*(.+)/);
+    if (oMatch) {
+      let optText = oMatch[2];
+      // 检查选项文本末尾是否粘了答案
+      const inlineAns = optText.match(/^(.+?)(?:正确)?答案[：:]\s*([A-O]+)$/i);
+      if (inlineAns) {
+        optText = inlineAns[1].trim();
+        cur.answer = inlineAns[2].toUpperCase();
+      }
+      cur.options.push({ letter: oMatch[1], text: optText.trim(), zh: '' });
+    } else {
+      cur.stem += line;
+    }
+  }
+  if (cur && cur.options.length > 0) questions.push(cur);
+}
+
 // --- 单选题（题号+题干+选项+独立答案行）---
-// 格式：
-//   1. 题干（  ）
-//      A. 选项A
-//      B. 选项B
-//      C. 选项C
-//      D. 选项D
-//      答案：D
 function parseSingleChoice(content, questions) {
   const lines = content.split('\n');
   let cur = null;
   for (const raw of lines) {
     const line = raw.trim();
     if (!line) continue;
-    // 题号行：1. / 1、 / 1． 后接题干
+    // 跳过标题行
+    if (/^[一二三四五六七八九十]+[、．.]|\（[一二三四五六七八九十]+）/.test(line)) continue;
+    // 题号行
     const qMatch = line.match(/^(\d+)[\.、．]\s*(.+)/);
     if (qMatch) {
       if (cur && cur.options.length > 0) questions.push(cur);
@@ -289,18 +368,23 @@ function parseSingleChoice(content, questions) {
       continue;
     }
     if (!cur) continue;
-    // 答案行：答案：D / 答案:D / 正确答案：D
-    const ansMatch = line.match(/^(?:正确)?答案[：:]\s*([A-O])/);
+    // 答案行：支持多字母（兼容多选题混入）
+    const ansMatch = line.match(/^(?:正确)?答案[：:]\s*([A-O]+)/i);
     if (ansMatch) {
-      cur.answer = ansMatch[1];
+      cur.answer = ansMatch[1].toUpperCase();
       continue;
     }
-    // 选项行：A. / A) / A、 后接文本
+    // 选项行（处理答案粘在末尾的情况）
     const oMatch = line.match(/^([A-O])[\.\)、．]\s*(.+)/);
     if (oMatch) {
-      cur.options.push({ letter: oMatch[1], text: oMatch[2].trim(), zh: '' });
+      let optText = oMatch[2];
+      const inlineAns = optText.match(/^(.+?)(?:正确)?答案[：:]\s*([A-O]+)$/i);
+      if (inlineAns) {
+        optText = inlineAns[1].trim();
+        cur.answer = inlineAns[2].toUpperCase();
+      }
+      cur.options.push({ letter: oMatch[1], text: optText.trim(), zh: '' });
     } else {
-      // 题干跨行：追加到 stem
       cur.stem += line;
     }
   }
@@ -314,15 +398,31 @@ function parseByType(type, content, questions) {
   else if (type === 'fillblank') parseFillBlank(content, questions);
   else if (type === 'reading') parseReading(content, questions);
   else if (type === 'singleChoice') parseSingleChoice(content, questions);
+  else if (type === 'multiChoice') parseMultiChoice(content, questions);
+  else if (type === 'judgment') parseJudgment(content, questions);
 }
 
 // --- 自动检测题型（无 # 标题时）---
 function autoDetectAndParse(text, questions) {
-  // 特征：
-  //  - 选词填空：含 __X) word__ 或 _+X) word_+ NUM) 标记
-  //  - 段落匹配：含 Passage + 字母段落 + "Question stem (X)"
-  //  - 阅读：含 NUMBER) Question + A./B./C./D. 选项
-  //  - 听力：含 NUMBER. + A./B./C./D. 选项（无题干）
+  // 按中文段落标题分节：一、判断题 / （一）多选题 / 二、选择题 等
+  const sections = text.split(/\n(?=[一二三四五六七八九十]+[、．.][^\n]*[题]|(?=（[一二三四五六七八九十]+）[^\n]*[题]))/);
+  if (sections.length > 1) {
+    for (const sec of sections) {
+      const trimmed = sec.trim();
+      if (!trimmed) continue;
+      parseSectionAuto(trimmed, questions);
+    }
+  } else {
+    parseSectionAuto(text, questions);
+  }
+}
+
+function parseSectionAuto(text, questions) {
+  // 判断题：检测"对/错"答案
+  if (/^\d+[\.、．]\s*.+/m.test(text) && /^(?:正确)?答案[：:]\s*(对|错|√|×|✓|✗)/im.test(text)) {
+    parseJudgment(text, questions);
+    return;
+  }
 
   // 选词填空：检测 __LETTER) 或 _+LETTER) 模式
   if (/_+\s*[A-O][\)\.]\s*\S+/.test(text) && /\d{2}[\)\.]/.test(text)) {
@@ -333,6 +433,12 @@ function autoDetectAndParse(text, questions) {
   // 段落匹配：检测段落字母标记 + "(X)" 答案标记
   if (/\(([A-H])\)/.test(text) && /[A-H][\.\)]\s*.{20,}/.test(text)) {
     parseMatching(text, questions);
+    return;
+  }
+
+  // 多选题：标题含"多选"或答案行有多字母
+  if (/多选/.test(text) || /^(?:正确)?答案[：:]\s*[A-O]{2,}/im.test(text)) {
+    parseMultiChoice(text, questions);
     return;
   }
 
