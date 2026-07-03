@@ -1,9 +1,5 @@
 // 期末刷题宝典 Ultra — 主逻辑
 
-const TYPES = {
-  listening: '听力', matching: '段落匹配', fillblank: '选词填空', reading: '阅读'
-};
-
 // npoint 题库地址（M5 部署时填入真实 URL；为空则直接用 default.json）
 const NPOINT_URL = '';
 
@@ -20,7 +16,7 @@ const LS = {
 
 let state = {
   mode: 'practice',
-  type: 'listening',
+  typeName: '',    // 当前选中的题型名称
   idx: 0,
   selected: null,
   answered: false,
@@ -60,8 +56,8 @@ async function loadBank(bankId) {
   state.editedAnswers = JSON.parse(localStorage.getItem(LS.answers(bank.id)) || '{}');
 
   // 选择该题库第一个可用题型
-  const firstType = Object.keys(TYPES).find(t => state.questions.some(q => q.type === t)) || 'listening';
-  state.type = firstType;
+  const firstTypeName = getTypeNames()[0] || '';
+  state.typeName = firstTypeName;
   state.mode = 'practice';
   buildList();
   renderTabs();
@@ -172,6 +168,15 @@ async function switchBank(bankId) {
 }
 
 // ---------- 渲染 ----------
+function getTypeNames() {
+  const seen = [];
+  for (const q of state.questions) {
+    const tn = q.typeName || '未分类';
+    if (!seen.includes(tn)) seen.push(tn);
+  }
+  return seen;
+}
+
 function updateHeader() {
   const total = state.questions.length;
   const bankName = state.bank ? state.bank.name : '大学英语4（默认）';
@@ -181,17 +186,17 @@ function updateHeader() {
 function renderTabs() {
   const tabs = document.getElementById('tabs');
   let html = '';
-  for (const t of Object.keys(TYPES)) {
-    const items = state.questions.filter(q => q.type === t);
+  for (const tn of getTypeNames()) {
+    const items = state.questions.filter(q => (q.typeName || '未分类') === tn);
     if (items.length === 0) continue;
-    html += `<div class="tab ${t === state.type ? 'active' : ''}" data-type="${t}" onclick="switchType('${t}')">
-      ${TYPES[t]}<span class="count">${items.length}题</span></div>`;
+    html += `<div class="tab ${tn === state.typeName ? 'active' : ''}" data-type="${escapeHtml(tn)}" onclick="switchType('${escapeHtml(tn)}')">
+      ${escapeHtml(tn)}<span class="count">${items.length}题</span></div>`;
   }
   tabs.innerHTML = html;
 }
 
 function buildList() {
-  let arr = state.questions.filter(q => q.type === state.type);
+  let arr = state.questions.filter(q => (q.typeName || '未分类') === state.typeName);
   if (state.mode === 'wrong') {
     arr = arr.filter(q => state.wrong[q.id]);
   } else if (state.mode === 'fav') {
@@ -214,8 +219,8 @@ function setMode(m) {
   buildList();
 }
 
-function switchType(t) {
-  state.type = t;
+function switchType(tn) {
+  state.typeName = tn;
   renderTabs();
   buildList();
 }
@@ -238,15 +243,15 @@ function render() {
     return;
   }
   const q = state.list[state.idx];
-  if (q.type === 'fillblank') renderFillBlank(q, content);
+  if (q.wordBank) renderFillBlank(q, content);
   else renderChoice(q, content);
   updateStats();
 }
 
-// ---------- 选择题（听力/匹配/阅读）----------
+// ---------- 选择题（通用/匹配/听力）----------
 function renderChoice(q, content) {
   let passageHtml = '';
-  if (q.type === 'matching' && q.passages) {
+  if (q.passages) {
     const fullText = Object.entries(q.passages).map(([k,v]) => `<b>${k}.</b> ${escapeHtml(v)}`).join('<br><br>');
     passageHtml = `
       <div class="passage-toggle" onclick="togglePassage(this)">展开/收起原文 ▾</div>
@@ -254,12 +259,12 @@ function renderChoice(q, content) {
   }
 
   let stemHtml = escapeHtml(q.stem || '');
-  if (q.type === 'listening') {
-    stemHtml = `<b>第 ${q.number} 题</b>`;
+  if (/^第\d+题$/.test(q.stem)) {
+    stemHtml = `<b>${q.stem}</b>`;
   }
 
   let optionsHtml = '';
-  if (q.type === 'matching') {
+  if (q.passages) {
     const letters = q.options.map(o => o.letter);
     optionsHtml = `<div class="match-options" id="matchOpts">` +
       letters.map(l => `<div class="match-opt" data-l="${l}" onclick="selectMatch('${l}')">${l}</div>`).join('') +
@@ -382,9 +387,18 @@ function confirmFill() {
   const blanks = getFillBlanks(state.list[state.idx]);
   const wordByLetter = {};
   (state.list[state.idx].wordBank || []).forEach(w => wordByLetter[w.letter] = w.text);
-  let correct = 0, total = 0;
+  const total = Object.keys(blanks).length;
+  state.answered = true;
+  const box = document.getElementById('answerBox');
+  if (total === 0) {
+    box.className = 'answer-box show';
+    box.innerHTML = `<span class="label">已作答</span> 正确答案：无答案`;
+    saveState();
+    updateStats();
+    return;
+  }
+  let correct = 0;
   for (const num in blanks) {
-    total++;
     const el = document.querySelector(`.blank[data-num="${num}"]`);
     const userLetter = fillState.current[num];
     const correctLetter = blanks[num];
@@ -398,9 +412,7 @@ function confirmFill() {
       el.textContent = (userLetter||'空') + '→' + correctLetter + '(' + word + ')';
     }
   }
-  state.answered = true;
   const allRight = correct === total;
-  const box = document.getElementById('answerBox');
   box.className = 'answer-box show ' + (allRight ? 'correct' : 'wrong');
   box.innerHTML = `<span class="label">${allRight?'全对！':'部分正确'}</span> 答对 ${correct}/${total} 空`;
 
@@ -434,7 +446,7 @@ function restoreFillResult(q) {
 
 // ---------- 答案管理 ----------
 function getAnswer(q) {
-  if (q.type === 'fillblank') {
+  if (q.wordBank) {
     return state.editedAnswers[q.id] || q.blanks;
   }
   return state.editedAnswers[q.id] || q.answer;
@@ -466,41 +478,47 @@ function selectMatch(letter) {
 
 function showResult(q) {
   const answer = getAnswer(q);
-  const correct = state.selected === answer;
-  if (q.type === 'matching') {
+  const noAnswer = !answer;
+  const correct = noAnswer ? false : state.selected === answer;
+  if (q.passages) {
     document.querySelectorAll('.match-opt').forEach(el => {
       const l = el.dataset.l;
       el.classList.remove('selected');
-      if (l === answer) el.classList.add('correct');
+      if (!noAnswer && l === answer) el.classList.add('correct');
       else if (l === state.selected) el.classList.add('wrong');
     });
   } else {
     document.querySelectorAll('.option').forEach(el => {
       const l = el.dataset.l;
       el.classList.remove('selected');
-      if (l === answer) el.classList.add('correct');
+      if (!noAnswer && l === answer) el.classList.add('correct');
       else if (l === state.selected) el.classList.add('wrong');
     });
   }
   const box = document.getElementById('answerBox');
-  box.className = 'answer-box show ' + (correct ? 'correct' : 'wrong');
   let detail = '';
-  if (answer) {
+  if (noAnswer) {
+    detail = '无答案';
+  } else {
     const ansOpt = (q.options || []).find(o => o.letter === answer);
     if (ansOpt) {
       detail = `${answer}. ${escapeHtml(ansOpt.text)}`;
     } else {
       detail = answer;
     }
-  } else {
-    detail = '（本题未标注答案）';
   }
   const edited = isAnswerEdited(q);
   if (edited) detail += ' <span style="color:#fa8c16;font-size:11px">✎已编辑</span>';
-  box.innerHTML = `<span class="label">${correct?'回答正确！':'回答错误'}</span> 正确答案：${detail}`;
 
-  if (correct) { state.right[q.id] = true; delete state.wrong[q.id]; }
-  else state.wrong[q.id] = true;
+  if (noAnswer) {
+    box.className = 'answer-box show';
+    box.innerHTML = `<span class="label">已作答</span> 正确答案：${detail}`;
+  } else {
+    box.className = 'answer-box show ' + (correct ? 'correct' : 'wrong');
+    box.innerHTML = `<span class="label">${correct?'回答正确！':'回答错误'}</span> 正确答案：${detail}`;
+    if (correct) { state.right[q.id] = true; delete state.wrong[q.id]; }
+    else state.wrong[q.id] = true;
+  }
   saveState();
   updateStats();
 }
@@ -723,8 +741,7 @@ function openEditAnswer() {
   const overlay = document.getElementById('editAnswerOverlay');
   const body = document.getElementById('editAnswerBody');
 
-  if (q.type === 'fillblank') {
-    // 选词填空：编辑每个空格的字母
+  if (q.wordBank) {
     const blanks = getFillBlanks(q);
     let html = '<p style="font-size:13px;color:#666;margin-bottom:8px">修改每个空格对应的字母：</p>';
     for (const num of Object.keys(blanks).sort((a,b) => a-b)) {
@@ -767,7 +784,7 @@ function selectEditAnswer(letter) {
 
 function confirmEditAnswer() {
   const q = state.list[state.idx];
-  if (q.type === 'fillblank') {
+  if (q.wordBank) {
     const blanks = {};
     const inputs = document.querySelectorAll('[id^="editBlank_"]');
     inputs.forEach(inp => {
@@ -836,17 +853,17 @@ document.addEventListener('keydown', (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
 
   // A-O 字母键选词（选词填空）
-  if (/^[A-O]$/i.test(e.key) && !state.answered && q.type === 'fillblank') {
+  if (/^[A-O]$/i.test(e.key) && !state.answered && q.wordBank) {
     useWord(e.key.toUpperCase());
     e.preventDefault();
     return;
   }
   // 数字键 1-4 选择选项（选择题）
-  if (['1','2','3','4'].includes(e.key) && !state.answered && q.type !== 'fillblank') {
+  if (['1','2','3','4'].includes(e.key) && !state.answered && !q.wordBank) {
     const letters = q.options ? q.options.map(o => o.letter) : [];
     const idx = parseInt(e.key) - 1;
     if (idx < letters.length) {
-      if (q.type === 'matching') selectMatch(letters[idx]);
+      if (q.passages) selectMatch(letters[idx]);
       else selectOpt(letters[idx]);
       e.preventDefault();
     }

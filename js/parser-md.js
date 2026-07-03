@@ -336,8 +336,8 @@ function autoDetectAndParse(text, questions) {
     return;
   }
 
-  // 单选题：题号+题干+(可选) + 答案：X 独立答案行
-  if (/^\d+[\.、．]\s*.+/m.test(text) && /^\s*答案[：:]/m.test(text)) {
+  // 单选题：题号+题干 + ABCD 选项（答案行可选）
+  if (/^\d+[\.、．]\s*.+/m.test(text) && /^\s*[A-O][\.\)、．]\s*\S+/m.test(text)) {
     parseSingleChoice(text, questions);
     return;
   }
