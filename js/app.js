@@ -236,7 +236,7 @@ function renderChoice(q, content) {
       q.options.map(o => `
         <div class="option" data-l="${o.letter}" onclick="selectOpt('${o.letter}')">
           <div class="letter">${o.letter}</div>
-          <div class="opt-text">${escapeHtml(o.text)}${o.zh ? `<div style="color:#888;font-size:12px;margin-top:2px">${escapeHtml(o.zh)}</div>` : ''}</div>
+          <div class="opt-text">${escapeHtml(o.text)}</div>
         </div>`).join('') + `</div>`;
   }
 
@@ -456,7 +456,6 @@ function showResult(q) {
     const ansOpt = (q.options || []).find(o => o.letter === answer);
     if (ansOpt) {
       detail = `${answer}. ${escapeHtml(ansOpt.text)}`;
-      if (ansOpt.zh) detail += `<br><span style="color:#666">译文：${escapeHtml(ansOpt.zh)}</span>`;
     } else {
       detail = answer;
     }
