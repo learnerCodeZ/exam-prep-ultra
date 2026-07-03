@@ -27,7 +27,7 @@ function parseMarkdownBank(text, bankName) {
 }
 
 function detectType(title) {
-  const map = { '听力': 'listening', '段落匹配': 'matching', '选词填空': 'fillblank', '阅读': 'reading' };
+  const map = { '听力': 'listening', '段落匹配': 'matching', '选词填空': 'fillblank', '阅读': 'reading', '单选': 'singleChoice', '多选': 'singleChoice' };
   for (const [kw, type] of Object.entries(map)) {
     if (title.includes(kw)) return type;
   }
@@ -259,12 +259,61 @@ function findAnswer(opts) {
   return ans ? ans.letter : '';
 }
 
+// --- 单选题（题号+题干+选项+独立答案行）---
+// 格式：
+//   1. 题干（  ）
+//      A. 选项A
+//      B. 选项B
+//      C. 选项C
+//      D. 选项D
+//      答案：D
+function parseSingleChoice(content, questions) {
+  const lines = content.split('\n');
+  let cur = null;
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!line) continue;
+    // 题号行：1. / 1、 / 1． 后接题干
+    const qMatch = line.match(/^(\d+)[\.、．]\s*(.+)/);
+    if (qMatch) {
+      if (cur && cur.options.length > 0) questions.push(cur);
+      cur = {
+        id: 'dx_' + qMatch[1],
+        type: 'reading',
+        typeName: '单选题',
+        number: parseInt(qMatch[1]),
+        stem: qMatch[2].trim(),
+        options: [],
+        answer: ''
+      };
+      continue;
+    }
+    if (!cur) continue;
+    // 答案行：答案：D / 答案:D / 正确答案：D
+    const ansMatch = line.match(/^(?:正确)?答案[：:]\s*([A-O])/);
+    if (ansMatch) {
+      cur.answer = ansMatch[1];
+      continue;
+    }
+    // 选项行：A. / A) / A、 后接文本
+    const oMatch = line.match(/^([A-O])[\.\)、．]\s*(.+)/);
+    if (oMatch) {
+      cur.options.push({ letter: oMatch[1], text: oMatch[2].trim(), zh: '' });
+    } else {
+      // 题干跨行：追加到 stem
+      cur.stem += line;
+    }
+  }
+  if (cur && cur.options.length > 0) questions.push(cur);
+}
+
 // --- 类型分派 ---
 function parseByType(type, content, questions) {
   if (type === 'listening') parseListening(content, questions);
   else if (type === 'matching') parseMatching(content, questions);
   else if (type === 'fillblank') parseFillBlank(content, questions);
   else if (type === 'reading') parseReading(content, questions);
+  else if (type === 'singleChoice') parseSingleChoice(content, questions);
 }
 
 // --- 自动检测题型（无 # 标题时）---
@@ -284,6 +333,12 @@ function autoDetectAndParse(text, questions) {
   // 段落匹配：检测段落字母标记 + "(X)" 答案标记
   if (/\(([A-H])\)/.test(text) && /[A-H][\.\)]\s*.{20,}/.test(text)) {
     parseMatching(text, questions);
+    return;
+  }
+
+  // 单选题：题号+题干+(可选) + 答案：X 独立答案行
+  if (/^\d+[\.、．]\s*.+/m.test(text) && /^\s*答案[：:]/m.test(text)) {
+    parseSingleChoice(text, questions);
     return;
   }
 

@@ -15,11 +15,6 @@ body {
 }
 .header h1 { font-size: 18px; font-weight: 600; }
 .header-right { display: flex; gap: 8px; align-items: center; }
-.bank-select {
-  padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.4);
-  background: rgba(255,255,255,0.15); color: #fff; font-size: 12px; cursor: pointer;
-}
-.bank-select option { color: #333; }
 .btn-import {
   padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.5);
   background: rgba(255,255,255,0.2); color: #fff; font-size: 12px; cursor: pointer;
@@ -122,6 +117,13 @@ body {
 }
 .sidebar-bank-item:hover .bank-del { display: flex; }
 .sidebar-bank-item .bank-del:hover { background: #fee2e2; color: #ef4444; }
+.sidebar-bank-item .bank-rename {
+  width: 24px; height: 24px; display: none; align-items: center; justify-content: center;
+  border: none; background: transparent; border-radius: 4px; cursor: pointer;
+  font-size: 12px; color: #bbb; flex-shrink: 0;
+}
+.sidebar-bank-item:hover .bank-rename { display: flex; }
+.sidebar-bank-item .bank-rename:hover { background: #e8f3ff; color: #1a73e8; }
 
 /* Sidebar import button */
 .sidebar-import {

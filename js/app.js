@@ -94,7 +94,7 @@ async function loadDefaultBank() {
   if (res.ok) return await res.json();
   // 3. 实在不行用 v1.0 数据
   console.error('No default bank available');
-  return { id: 'default', name: '默认题库', questions: [] };
+  return { id: 'default', name: '大学英语4（默认）', questions: [] };
 }
 
 function getUserBanks() {
@@ -122,7 +122,7 @@ function renderBankSelect() {
   const container = document.getElementById('sidebarBanks');
   const banks = getUserBanks();
   const activeId = state.bank ? state.bank.id : 'default';
-  let html = renderBankItem('default', '默认题库', state.questions.length, activeId === 'default', false);
+  let html = renderBankItem('default', '大学英语4（默认）', state.questions.length, activeId === 'default', false);
   for (const b of banks) {
     html += renderBankItem(b.id, b.name, b.questions ? b.questions.length : 0, activeId === b.id, true);
   }
@@ -138,12 +138,14 @@ function renderBankSelect() {
 
 function renderBankItem(id, name, count, isActive, deletable) {
   const iconChar = isActive ? '📖' : (id === 'default' ? '📚' : '📘');
+  const canRename = id !== 'default';
   return `<div class="sidebar-bank-item ${isActive?'active':''}" onclick="switchBank('${id}')">
     <div class="bank-icon">${iconChar}</div>
     <div class="bank-info">
       <div class="bank-name">${escapeHtml(name)}</div>
       <div class="bank-count">${count} 题</div>
     </div>
+    ${canRename ? `<button class="bank-rename" onclick="event.stopPropagation();startRename('${id}','${escapeHtml(name)}')" title="重命名">✎</button>` : ''}
     ${deletable ? `<button class="bank-del" onclick="event.stopPropagation();deleteBankUI('${id}')">✕</button>` : ''}
   </div>`;
 }
@@ -172,7 +174,7 @@ async function switchBank(bankId) {
 // ---------- 渲染 ----------
 function updateHeader() {
   const total = state.questions.length;
-  const bankName = state.bank ? state.bank.name : '默认题库';
+  const bankName = state.bank ? state.bank.name : '大学英语4（默认）';
   document.getElementById('hdrSub').textContent = `${bankName} · 共 ${total} 题`;
 }
 
@@ -695,6 +697,24 @@ function deleteBankUI(bankId) {
   } else {
     renderBankSelect();
   }
+}
+
+function startRename(bankId, currentName) {
+  const newName = prompt('修改题库名称：', currentName);
+  if (newName === null) return;
+  const trimmed = newName.trim();
+  if (!trimmed) { alert('题库名称不能为空'); return; }
+  const banks = getUserBanks();
+  const bank = banks.find(b => b.id === bankId);
+  if (!bank) { alert('题库不存在'); return; }
+  bank.name = trimmed;
+  localStorage.setItem(LS.banks, JSON.stringify(banks));
+  // 同步当前已加载的题库状态
+  if (state.bank && state.bank.id === bankId) {
+    state.bank.name = trimmed;
+    updateHeader();
+  }
+  renderBankSelect();
 }
 
 // ---------- 答案编辑弹窗 ----------
