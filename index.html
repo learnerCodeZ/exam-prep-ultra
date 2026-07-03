@@ -16,6 +16,7 @@
     </div>
   </div>
   <div class="header-right">
+    <button class="btn-help" onclick="openHelp()" title="使用帮助">?</button>
     <button class="btn-import" onclick="openImport()">+ 导入</button>
   </div>
 </div>
@@ -94,6 +95,57 @@
       </div>
     </div>
     <button class="modal-close" onclick="closeImport()">关闭</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="helpOverlay" onclick="closeHelp(event)">
+  <div class="modal-panel" onclick="event.stopPropagation()" style="max-width:480px">
+    <h3>使用帮助</h3>
+    <div class="help-content">
+      <div class="help-section">
+        <h4>快速开始</h4>
+        <ol>
+          <li>打开页面即可刷题，默认题库已内置</li>
+          <li>点左上角 ☰ 打开侧栏，切换题库</li>
+          <li>选答案后立即显示对错和正确答案</li>
+        </ol>
+      </div>
+      <div class="help-section">
+        <h4>导入题库</h4>
+        <ul>
+          <li><b>文件导入</b>：点右上角"+ 导入"，上传 .md / .docx / .pdf 文件</li>
+          <li><b>粘贴导入</b>：在导入弹窗的文本框粘贴题目内容，点"解析粘贴内容"</li>
+          <li><b>追加题目</b>：导入时选择"导入到"已有题库，或点侧栏题库旁的 + 按钮</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>支持的题目格式</h4>
+        <ul>
+          <li><b>单选题</b>：题号 + 题干 + ABCD 选项 + 答案</li>
+          <li><b>多选题</b>：同上，答案为多字母（如 CD、BCD）</li>
+          <li><b>判断题</b>：题号 + 题干 + 答案：对/错</li>
+          <li><b>英语题型</b>：听力、段落匹配、选词填空、阅读（需用 Markdown 格式）</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>快捷键</h4>
+        <table class="help-keys">
+          <tr><td><kbd>1</kbd>-<kbd>4</kbd></td><td>选择选项</td></tr>
+          <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>上一题 / 下一题</td></tr>
+          <tr><td><kbd>F</kbd></td><td>收藏 / 取消收藏</td></tr>
+          <tr><td><kbd>A</kbd>-<kbd>O</kbd></td><td>选词填空选词</td></tr>
+        </table>
+      </div>
+      <div class="help-section">
+        <h4>其他功能</h4>
+        <ul>
+          <li><b>编辑答案</b>：答题后点 ✎ 可修改正确答案</li>
+          <li><b>重命名题库</b>：侧栏题库旁 ✎ 按钮</li>
+          <li><b>题目导航</b>：点中间的题号，跳转到任意题目</li>
+        </ul>
+      </div>
+    </div>
+    <button class="modal-close" onclick="closeHelp()">关闭</button>
   </div>
 </div>
 

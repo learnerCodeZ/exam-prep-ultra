@@ -914,6 +914,16 @@ function closeEditAnswer(e) {
   document.getElementById('editAnswerOverlay').classList.remove('show');
 }
 
+// ---------- 帮助弹窗 ----------
+function openHelp() {
+  document.getElementById('helpOverlay').classList.add('show');
+}
+
+function closeHelp(e) {
+  if (e && e.target !== document.getElementById('helpOverlay')) return;
+  document.getElementById('helpOverlay').classList.remove('show');
+}
+
 // ---------- 持久化 ----------
 function saveState() {
   if (!state.bank) return;
@@ -934,7 +944,7 @@ function escapeHtml(s) {
 // ---------- 键盘快捷键 ----------
 document.addEventListener('keydown', (e) => {
   // 弹窗打开时不响应
-  const overlays = ['qmapOverlay', 'importOverlay', 'editAnswerOverlay'];
+  const overlays = ['qmapOverlay', 'importOverlay', 'editAnswerOverlay', 'helpOverlay'];
   if (overlays.some(id => document.getElementById(id).classList.contains('show'))) return;
   if (state.list.length === 0) return;
   const q = state.list[state.idx];

@@ -15,6 +15,12 @@ body {
 }
 .header h1 { font-size: 18px; font-weight: 600; }
 .header-right { display: flex; gap: 8px; align-items: center; }
+.btn-help {
+  width: 26px; height: 26px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.5);
+  background: rgba(255,255,255,0.2); color: #fff; font-size: 13px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+.btn-help:hover { background: rgba(255,255,255,0.35); }
 .btn-import {
   padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.5);
   background: rgba(255,255,255,0.2); color: #fff; font-size: 12px; cursor: pointer;
@@ -359,3 +365,13 @@ body {
   .option { padding: 12px 10px; }
   .word-chip { padding: 6px 12px; font-size: 13px; }
 }
+
+/* Help modal */
+.help-content { max-height: 60vh; overflow-y: auto; font-size: 13px; line-height: 1.7; }
+.help-section { margin-bottom: 16px; }
+.help-section h4 { font-size: 13px; font-weight: 600; margin-bottom: 6px; color: #1a73e8; }
+.help-section ul, .help-section ol { padding-left: 20px; margin: 0; }
+.help-section li { margin-bottom: 4px; }
+.help-keys { border-collapse: collapse; }
+.help-keys td { padding: 3px 10px 3px 0; }
+.help-keys kbd { background: #f0f0f0; border: 1px solid #d0d0d0; border-radius: 3px; padding: 1px 6px; font-size: 12px; font-family: inherit; }
