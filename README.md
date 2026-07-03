@@ -31,9 +31,7 @@
 exam-prep-ultra/
 ├── README.md
 ├── AGENTS.md
-├── docs/
-│   └── PRD.md
-└── src/              ← GitHub Pages 根目录
+└── docs/              ← GitHub Pages 根目录
     ├── index.html
     ├── css/
     │   └── style.css
@@ -46,9 +44,10 @@ exam-prep-ultra/
     │   ├── mammoth.min.js
     │   ├── pdf.min.js
     │   └── pdf.worker.min.js
-    └── data/
-        ├── default.json
-        └── sample-bank.md
+    ├── data/
+    │   ├── default.json
+    │   └── sample-bank.md
+    └── PRD.md
 ```
 
 ## 文档
