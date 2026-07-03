@@ -88,7 +88,6 @@ async function loadDefaultBank() {
   // 2. 内置 default.json fallback
   const res = await fetch('data/default.json');
   if (res.ok) return await res.json();
-  // 3. 实在不行用 v1.0 数据
   console.error('No default bank available');
   return { id: 'default', name: '大学英语4（默认）', questions: [] };
 }
