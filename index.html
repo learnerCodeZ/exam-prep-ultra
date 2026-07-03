@@ -8,14 +8,32 @@
 </head>
 <body>
 <div class="header">
-  <div>
-    <h1>期末刷题宝典</h1>
-    <div class="sub-info" id="hdrSub">加载中...</div>
+  <div style="display:flex;align-items:center;gap:8px">
+    <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+    <div>
+      <h1>期末刷题宝典</h1>
+      <div class="sub-info" id="hdrSub">加载中...</div>
+    </div>
   </div>
   <div class="header-right">
     <select class="bank-select" id="bankSelect" onchange="switchBank(this.value)"></select>
     <button class="btn-del" id="btnDelBank" onclick="deleteBankUI(document.getElementById('bankSelect').value)" title="删除当前题库" style="display:none">✕</button>
-    <button class="btn-import" onclick="openImport()">+ 导入题库</button>
+    <button class="btn-import" onclick="openImport()">+ 导入</button>
+  </div>
+</div>
+
+<!-- 侧栏遮罩 -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- 侧栏 -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3>题库列表</h3>
+    <button class="menu-btn" onclick="toggleSidebar()">✕</button>
+  </div>
+  <div class="sidebar-body">
+    <div class="sidebar-banks" id="sidebarBanks"></div>
+    <button class="sidebar-import" onclick="openImport();toggleSidebar()">+ 导入题库</button>
   </div>
 </div>
 

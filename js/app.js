@@ -119,22 +119,36 @@ function deleteBank(bankId) {
 }
 
 function renderBankSelect() {
-  const sel = document.getElementById('bankSelect');
+  const container = document.getElementById('sidebarBanks');
   const banks = getUserBanks();
-  let html = `<option value="default">默认题库</option>`;
-  for (const b of banks) {
-    html += `<option value="${b.id}">${escapeHtml(b.name)}</option>`;
-  }
   const activeId = state.bank ? state.bank.id : 'default';
-  sel.innerHTML = html;
-  sel.value = activeId;
-  // 删除按钮：仅用户导入的题库显示
-  const delBtn = document.getElementById('btnDelBank');
-  if (delBtn) delBtn.style.display = (activeId && activeId !== 'default') ? 'block' : 'none';
+  let html = renderBankItem('default', '默认题库', state.questions.length, activeId === 'default', false);
+  for (const b of banks) {
+    html += renderBankItem(b.id, b.name, b.questions ? b.questions.length : 0, activeId === b.id, true);
+  }
+  container.innerHTML = html;
+}
+
+function renderBankItem(id, name, count, isActive, deletable) {
+  return `<div class="sidebar-bank-item ${isActive?'active':''}" onclick="switchBank('${id}')">
+    <div>
+      <div class="bank-name">${escapeHtml(name)}</div>
+      <div class="bank-count">${count} 题</div>
+    </div>
+    ${deletable ? `<button class="bank-del" onclick="event.stopPropagation();deleteBankUI('${id}')">✕</button>` : ''}
+  </div>`;
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
 }
 
 async function switchBank(bankId) {
   localStorage.setItem(LS.activeBank, bankId);
+  // 切换题库后关闭侧栏
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
   await loadBank(bankId);
 }
 
