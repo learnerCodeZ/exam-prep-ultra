@@ -613,6 +613,10 @@ function parseImportedText() {
   if (!text) { alert('请先粘贴题目内容'); return; }
   const name = document.getElementById('importName').value.trim() || '粘贴题库';
   pendingBank = parseMarkdownBank(text, name);
+  if (pendingBank.questions.length === 0) {
+    alert('未能解析出题目，请检查内容格式');
+    return;
+  }
   showImportPreview(pendingBank);
 }
 
@@ -627,6 +631,10 @@ function onFileSelect(e) {
     const reader = new FileReader();
     reader.onload = (ev) => {
       pendingBank = parseMarkdownBank(ev.target.result, name);
+      if (pendingBank.questions.length === 0) {
+        alert('未能解析出题目，请检查文件格式');
+        return;
+      }
       showImportPreview(pendingBank);
     };
     reader.readAsText(file, 'utf-8');
@@ -639,6 +647,10 @@ function onFileSelect(e) {
         .then(bank => {
           pendingBank = bank;
           status.style.display = 'none';
+          if (bank.questions.length === 0) {
+            alert('未能解析出题目，请检查文件格式');
+            return;
+          }
           showImportPreview(bank);
         })
         .catch(err => {
@@ -656,6 +668,10 @@ function onFileSelect(e) {
         .then(bank => {
           pendingBank = bank;
           status.style.display = 'none';
+          if (bank.questions.length === 0) {
+            alert('未能解析出题目，请检查文件格式');
+            return;
+          }
           showImportPreview(bank);
         })
         .catch(err => {
