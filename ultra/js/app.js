@@ -1010,7 +1010,7 @@ function escapeHtml(s) {
 // ---------- 键盘快捷键 ----------
 document.addEventListener('keydown', (e) => {
   // 弹窗打开时不响应
-  const overlays = ['qmapOverlay', 'importOverlay', 'editAnswerOverlay', 'helpOverlay', 'authOverlay', 'friendsOverlay', 'adminOverlay'];
+  const overlays = ['qmapOverlay', 'importOverlay', 'editAnswerOverlay', 'helpOverlay', 'authOverlay', 'changePwdOverlay', 'friendsOverlay', 'adminOverlay'];
   if (overlays.some(id => document.getElementById(id).classList.contains('show'))) return;
   if (state.list.length === 0) return;
   const q = state.list[state.idx];
@@ -1050,6 +1050,7 @@ function updateUserUI() {
       <span class="user-name">${escapeHtml(state.user.nickname || state.user.email)}</span>
       <button class="btn-friends" onclick="FriendsUI.open()" title="好友">👥</button>
       ${isAdmin ? '<button class="btn-admin" onclick="AdminUI.open()" title="管理">⚙</button>' : ''}
+      <button class="btn-changepwd" onclick="AuthUI.openChangePwd()" title="修改密码">🔑</button>
       <button class="btn-logout" onclick="AuthUI.handleLogout()">退出</button>`;
   } else {
     area.innerHTML = `<button class="btn-login" onclick="AuthUI.open()">登录</button>`;

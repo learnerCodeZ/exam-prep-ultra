@@ -106,4 +106,52 @@ const AuthUI = {
       AuthUI.showError(e.message || '提交失败');
     }
   },
+
+  // ---------- 修改密码 ----------
+  openChangePwd() {
+    const overlay = document.getElementById('changePwdOverlay');
+    if (!overlay) return;
+    AuthUI.clearChangePwdError();
+    ['changePwdOld', 'changePwdNew', 'changePwdNew2'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    overlay.classList.add('show');
+  },
+
+  closeChangePwd(e) {
+    if (e && e.target !== document.getElementById('changePwdOverlay')) return;
+    document.getElementById('changePwdOverlay').classList.remove('show');
+  },
+
+  showChangePwdError(msg) {
+    const el = document.getElementById('changePwdError');
+    if (el) { el.textContent = msg; el.style.display = 'block'; }
+  },
+
+  clearChangePwdError() {
+    const el = document.getElementById('changePwdError');
+    if (el) { el.textContent = ''; el.style.display = 'none'; }
+  },
+
+  async handleChangePassword() {
+    AuthUI.clearChangePwdError();
+    const oldPwd = document.getElementById('changePwdOld').value;
+    const newPwd = document.getElementById('changePwdNew').value;
+    const newPwd2 = document.getElementById('changePwdNew2').value;
+
+    if (!oldPwd || !newPwd) { AuthUI.showChangePwdError('请填写旧密码和新密码'); return; }
+    if (newPwd.length < 6) { AuthUI.showChangePwdError('新密码至少 6 位'); return; }
+    if (newPwd !== newPwd2) { AuthUI.showChangePwdError('两次新密码不一致'); return; }
+    if (newPwd === oldPwd) { AuthUI.showChangePwdError('新密码不能与旧密码相同'); return; }
+
+    try {
+      await API.auth.changePassword(oldPwd, newPwd);
+      alert('密码修改成功，请用新密码登录。');
+      AuthUI.closeChangePwd();
+      // 修改密码后登出，要求用新密码重新登录
+      AuthUI.handleLogout();
+    } catch (e) {
+      AuthUI.showChangePwdError(e.message || '修改失败');
+    }
+  },
 };

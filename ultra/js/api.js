@@ -59,6 +59,12 @@ const API = {
         body: { email },
       });
     },
+    changePassword(oldPassword, newPassword) {
+      return API.request('/api/auth/me', {
+        method: 'PUT',
+        body: { old_password: oldPassword, new_password: newPassword },
+      });
+    },
   },
 
   // ---------- Banks ----------

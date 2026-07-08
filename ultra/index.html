@@ -213,6 +213,28 @@
   </div>
 </div>
 
+<!-- 修改密码弹窗 -->
+<div class="modal-overlay" id="changePwdOverlay" onclick="AuthUI.closeChangePwd(event)">
+  <div class="modal-panel" onclick="event.stopPropagation()" style="max-width:380px">
+    <h3>修改密码</h3>
+    <div id="changePwdError" class="auth-error" style="display:none"></div>
+    <div class="auth-field">
+      <label>旧密码</label>
+      <input type="password" id="changePwdOld" placeholder="请输入当前密码" autocomplete="current-password">
+    </div>
+    <div class="auth-field">
+      <label>新密码</label>
+      <input type="password" id="changePwdNew" placeholder="至少6位" autocomplete="new-password">
+    </div>
+    <div class="auth-field">
+      <label>确认新密码</label>
+      <input type="password" id="changePwdNew2" placeholder="再次输入新密码" autocomplete="new-password">
+    </div>
+    <button class="auth-submit" onclick="AuthUI.handleChangePassword()">确认修改</button>
+    <button class="modal-close" onclick="AuthUI.closeChangePwd()">关闭</button>
+  </div>
+</div>
+
 <!-- 好友弹窗 -->
 <div class="modal-overlay" id="friendsOverlay" onclick="FriendsUI.close(event)">
   <div class="modal-panel" onclick="event.stopPropagation()" style="max-width:440px">

@@ -37,7 +37,7 @@
 
 - `ultra/_worker.js` — Workers 统一路由入口
 - `ultra/functions/_middleware.js` — 认证中间件（解析 session cookie → 查 KV → 查 D1 → 注入 user）
-- `ultra/functions/api/auth/` — register, login, logout, me（GET 获取用户信息 / POST 找回密码请求）
+- `ultra/functions/api/auth/` — register, login, logout, me（GET 用户信息 / POST 找回密码 / PUT 修改密码）
 - `ultra/functions/api/banks/` — index, [id], [id]/questions
 - `ultra/functions/api/users/` — search
 - `ultra/functions/api/friends/` — index, request, accept, reject
