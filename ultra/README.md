@@ -207,11 +207,17 @@ npm run gen:admin  # 生成管理员密码哈希
 
 ## 版本历史
 
-### v2.0 — Ultra（当前版本）
+### v3.0 — Ultra 全栈版（当前版本）
 
-全栈升级。基于 Cloudflare（D1 + KV + Pages Functions）构建后端，新增用户系统、好友共享题库、管理面板、离线兼容。前端保持纯 vanilla JS。
+Cloudflare 全栈架构。基于 D1 + KV + Pages Functions 构建后端，新增用户系统、好友共享题库、管理面板、离线兼容。前端保持纯 vanilla JS。
 
-技术架构：纯静态 SPA → Cloudflare 全栈
+源码见 [v3.0 Release](https://github.com/learnerCodeZ/exam-prep-ultra/releases/tag/v3.0)。
+
+### v2.0 — Ultra 网页版
+
+纯静态 SPA 重构。侧栏题库管理、多题型支持（单选/多选/判断/听力/阅读/选词填空/段落匹配）、Markdown/Word/PDF 导入、即选即判。
+
+源码见 [v2.0 Release](https://github.com/learnerCodeZ/exam-prep-ultra/releases/tag/v2.0)。
 
 ### v1.0 — Classic
 
