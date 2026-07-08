@@ -7,6 +7,11 @@ export async function onRequest(context) {
   const isPublicApi = publicPaths.some(p => url.pathname === p);
   const isStaticAsset = !url.pathname.startsWith('/api/');
 
+  // POST /api/auth/me 是找回密码请求，公开接口
+  if (url.pathname === '/api/auth/me' && request.method === 'POST') {
+    return next();
+  }
+
   if (isStaticAsset || isPublicApi) {
     return next();
   }

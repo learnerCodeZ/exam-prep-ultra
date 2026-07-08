@@ -38,6 +38,7 @@
 ### 🆕 管理面板
 - **用户管理**：查看所有用户、题库数量，可删除用户
 - **题库管理**：查看所有题库、可见性，可删除题库
+- **密码重置审批**：用户提交找回密码请求后，管理员审批同意则密码重置为 123456
 - **仅管理员可见**：普通用户看不到管理入口
 
 ## 快速开始
@@ -130,11 +131,11 @@ ultra/
 ├── functions/
 │   ├── _middleware.js       — 认证中间件
 │   └── api/
-│       ├── auth/            — register, login, logout, me
+│       ├── auth/            — register, login, logout, me（GET 用户信息 / POST 找回密码）
 │       ├── banks/           — index, [id], [id]/questions
 │       ├── users/           — search
 │       ├── friends/         — index, request, accept, reject
-│       └── admin/           — users, banks
+│       └── admin/           — users（用户管理 + 密码重置审批）, banks
 ├── scripts/
 │   └── gen-admin-hash.js   — 生成管理员密码哈希
 ├── data/

@@ -37,16 +37,16 @@
 
 - `ultra/_worker.js` — Workers 统一路由入口
 - `ultra/functions/_middleware.js` — 认证中间件（解析 session cookie → 查 KV → 查 D1 → 注入 user）
-- `ultra/functions/api/auth/` — register, login, logout, me
+- `ultra/functions/api/auth/` — register, login, logout, me（GET 获取用户信息 / POST 找回密码请求）
 - `ultra/functions/api/banks/` — index, [id], [id]/questions
 - `ultra/functions/api/users/` — search
 - `ultra/functions/api/friends/` — index, request, accept, reject
-- `ultra/functions/api/admin/` — users, banks
+- `ultra/functions/api/admin/` — users（GET 用户列表 / DELETE 删除用户 / GET ?action=reset-requests 密码重置列表 / PUT 审批密码重置）, banks
 
 ### 配置 & 数据（ultra/）
 
 - `ultra/wrangler.toml` — Cloudflare 配置（D1 + KV 绑定）
-- `ultra/schema.sql` — D1 建表 SQL（users, friends, banks）
+- `ultra/schema.sql` — D1 建表 SQL（users, friends, banks, password_resets）
 - `ultra/seed.sql` — 种子数据（管理员 + 默认题库）
 - `ultra/scripts/gen-admin-hash.js` — 生成管理员密码 PBKDF2 哈希
 - `ultra/_redirects` — SPA 路由规则
@@ -117,6 +117,7 @@
 | 数据 | 存储位置 | 说明 |
 |------|----------|------|
 | 用户/好友/题库元数据 | D1 | 关系查询（好友可见性） |
+| 密码重置请求 | D1 | password_resets 表，待管理员审批 |
 | Session token | KV (SESSION) | token → user_id，7 天过期 |
 | 题目 JSON | KV (QUESTIONS) | 单文件最大 25MB |
 | 答题记录/收藏 | localStorage | 个人数据，不同步服务端 |
@@ -141,6 +142,7 @@
 - 离线兼容：未登录用户完全本地运行；登录用户 API 失败时自动降级到 localStorage 缓存
 - 题库加载三级 fallback：本地 → API + 缓存 → npoint
 - 密码安全：PBKDF2 哈希，不存明文
+- 密码找回：用户提交请求 → 管理员审批 → 密码重置为 123456
 - Session：KV 存储 token，7 天过期，HttpOnly + Secure Cookie
 - 纯 vanilla JS，不引入框架
 

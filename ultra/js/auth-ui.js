@@ -21,11 +21,12 @@ const AuthUI = {
     });
     document.getElementById('authLoginForm').style.display = tab === 'login' ? 'block' : 'none';
     document.getElementById('authRegisterForm').style.display = tab === 'register' ? 'block' : 'none';
+    document.getElementById('authResetForm').style.display = tab === 'reset' ? 'block' : 'none';
     AuthUI.clearError();
   },
 
   clearForm() {
-    const ids = ['loginEmail', 'loginPassword', 'regEmail', 'regNickname', 'regPassword', 'regPassword2'];
+    const ids = ['loginEmail', 'loginPassword', 'regEmail', 'regNickname', 'regPassword', 'regPassword2', 'resetEmail'];
     ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
     AuthUI.clearError();
   },
@@ -88,5 +89,21 @@ const AuthUI = {
       console.warn('Logout API error:', e.message);
     }
     window.dispatchEvent(new CustomEvent('auth:logout'));
+  },
+
+  // 找回密码
+  async handleResetRequest() {
+    AuthUI.clearError();
+    const email = document.getElementById('resetEmail').value.trim();
+    if (!email) { AuthUI.showError('请输入邮箱'); return; }
+
+    try {
+      await API.auth.resetRequest(email);
+      alert('找回请求已提交，请等待管理员审批。审批通过后密码将重置为 123456。');
+      AuthUI.close();
+      AuthUI.switchTab('login');
+    } catch (e) {
+      AuthUI.showError(e.message || '提交失败');
+    }
   },
 };

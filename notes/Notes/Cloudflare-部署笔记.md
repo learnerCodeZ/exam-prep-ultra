@@ -382,7 +382,7 @@ node scripts/gen-admin-hash.js admin123
 npx wrangler d1 execute exam-prep-db --remote --file=schema.sql
 ```
 
-把 `schema.sql` 里的 SQL 发到云端 D1 执行，创建 3 张表：users、friends、banks。
+把 `schema.sql` 里的 SQL 发到云端 D1 执行，创建 4 张表：users、friends、banks、password_resets。
 
 类比：新买了一个 MySQL 数据库，先 `CREATE TABLE` 建好表结构。
 
@@ -551,7 +551,7 @@ npx wrangler pages deploy . --project-name=exam-prep-ultra --branch=main --commi
 
 ```bash
 # ⚠️ 会丢数据！生产环境慎用
-npx wrangler d1 execute exam-prep-db --remote --command="DROP TABLE IF EXISTS banks; DROP TABLE IF EXISTS friends; DROP TABLE IF EXISTS users;"
+npx wrangler d1 execute exam-prep-db --remote --command="DROP TABLE IF EXISTS password_resets; DROP TABLE IF EXISTS banks; DROP TABLE IF EXISTS friends; DROP TABLE IF EXISTS users;"
 
 # 重建
 npx wrangler d1 execute exam-prep-db --remote --file=schema.sql
@@ -566,6 +566,13 @@ node scripts/gen-admin-hash.js 新密码
 
 # 替换 seed.sql 中的哈希值后重新执行
 npx wrangler d1 execute exam-prep-db --remote --file=seed.sql
+```
+
+### 只新增表（不影响现有数据）
+
+```bash
+# 示例：新增 password_resets 表（第 5 批找回密码功能）
+npx wrangler d1 execute exam-prep-db --remote --command="CREATE TABLE IF NOT EXISTS password_resets (id INTEGER PRIMARY KEY AUTOINCREMENT, user_id INTEGER NOT NULL, status TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')), created_at TEXT DEFAULT (datetime('now')), FOREIGN KEY (user_id) REFERENCES users(id));"
 ```
 
 ### 数据库备份

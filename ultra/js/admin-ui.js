@@ -12,6 +12,7 @@ const AdminUI = {
     overlay.classList.add('show');
     await AdminUI.loadUsers();
     await AdminUI.loadBanks();
+    await AdminUI.loadResetRequests();
   },
 
   close(e) {
@@ -65,6 +66,43 @@ const AdminUI = {
         </tr>`).join('');
     } catch (e) {
       tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;color:#f5222d">${escapeHtml(e.message)}</td></tr>`;
+    }
+  },
+
+  // 加载密码重置请求
+  async loadResetRequests() {
+    const tbody = document.getElementById('adminResetBody');
+    if (!tbody) return;
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;color:#999">加载中...</td></tr>';
+    try {
+      const res = await API.admin.resetRequests();
+      const requests = res.requests || [];
+      if (requests.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:16px;color:#999">无请求</td></tr>';
+        return;
+      }
+      tbody.innerHTML = requests.map(r => `
+        <tr>
+          <td>${r.id}</td>
+          <td>${escapeHtml(r.nickname || '-')}</td>
+          <td>${escapeHtml(r.email)}</td>
+          <td><span class="admin-badge ${r.status === 'pending' ? 'badge-pending' : r.status === 'approved' ? 'badge-admin' : 'badge-user'}">${r.status === 'pending' ? '待审批' : r.status === 'approved' ? '已同意' : '已拒绝'}</span></td>
+          <td>${r.status === 'pending' ? `<button class="btn-admin-approve" onclick="AdminUI.handleReset('${r.id}','approve')">同意</button> <button class="btn-admin-reject" onclick="AdminUI.handleReset('${r.id}','reject')">拒绝</button>` : '-'}</td>
+        </tr>`).join('');
+    } catch (e) {
+      tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:16px;color:#f5222d">${escapeHtml(e.message)}</td></tr>`;
+    }
+  },
+
+  // 审批密码重置请求
+  async handleReset(requestId, action) {
+    const msg = action === 'approve' ? '确定同意？密码将重置为 123456。' : '确定拒绝该请求？';
+    if (!confirm(msg)) return;
+    try {
+      await API.admin.handleResetRequest(requestId, action);
+      await AdminUI.loadResetRequests();
+    } catch (e) {
+      alert(e.message || '操作失败');
     }
   },
 

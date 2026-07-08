@@ -168,6 +168,7 @@
     <div class="auth-tabs">
       <div class="auth-tab active" data-tab="login" onclick="AuthUI.switchTab('login')">登录</div>
       <div class="auth-tab" data-tab="register" onclick="AuthUI.switchTab('register')">注册</div>
+      <div class="auth-tab" data-tab="reset" onclick="AuthUI.switchTab('reset')">找回密码</div>
     </div>
     <div id="authError" class="auth-error" style="display:none"></div>
     <div id="authLoginForm">
@@ -199,6 +200,14 @@
         <input type="password" id="regPassword2" placeholder="再次输入密码" autocomplete="new-password">
       </div>
       <button class="auth-submit" onclick="AuthUI.handleRegister()">注 册</button>
+    </div>
+    <div id="authResetForm" style="display:none">
+      <div class="auth-reset-hint" style="font-size:13px;color:#666;margin-bottom:12px">输入注册邮箱，管理员审批后密码将重置为 123456</div>
+      <div class="auth-field">
+        <label>邮箱</label>
+        <input type="email" id="resetEmail" placeholder="请输入注册邮箱" autocomplete="email">
+      </div>
+      <button class="auth-submit" onclick="AuthUI.handleResetRequest()">提交找回请求</button>
     </div>
     <button class="modal-close" onclick="AuthUI.close()">关闭</button>
   </div>
@@ -235,6 +244,13 @@
       <table class="admin-table">
         <thead><tr><th>ID</th><th>名称</th><th>所有者</th><th>可见性</th><th>操作</th></tr></thead>
         <tbody id="adminBanksBody"></tbody>
+      </table>
+    </div>
+    <div class="admin-section">
+      <h4>密码重置审批</h4>
+      <table class="admin-table">
+        <thead><tr><th>ID</th><th>昵称</th><th>邮箱</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody id="adminResetBody"></tbody>
       </table>
     </div>
     <button class="modal-close" onclick="AdminUI.close()">关闭</button>

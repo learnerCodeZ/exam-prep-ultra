@@ -506,3 +506,14 @@ body {
   background: #fff; color: #cf1322; font-size: 12px; cursor: pointer;
 }
 .btn-admin-del:hover { background: #fff2f0; }
+.badge-pending { background: #fffbe6; color: #d48806; }
+.btn-admin-approve {
+  padding: 3px 10px; border: 1px solid #b7eb8f; border-radius: 4px;
+  background: #f6ffed; color: #52c41a; font-size: 12px; cursor: pointer;
+}
+.btn-admin-approve:hover { background: #d9f7be; }
+.btn-admin-reject {
+  padding: 3px 10px; border: 1px solid #ffccc7; border-radius: 4px;
+  background: #fff; color: #cf1322; font-size: 12px; cursor: pointer;
+}
+.btn-admin-reject:hover { background: #fff2f0; }

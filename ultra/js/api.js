@@ -53,6 +53,12 @@ const API = {
     me() {
       return API.request('/api/auth/me');
     },
+    resetRequest(email) {
+      return API.request('/api/auth/me', {
+        method: 'POST',
+        body: { email },
+      });
+    },
   },
 
   // ---------- Banks ----------
@@ -134,6 +140,15 @@ const API = {
     },
     banks() {
       return API.request('/api/admin/banks');
+    },
+    resetRequests() {
+      return API.request('/api/admin/users?action=reset-requests');
+    },
+    handleResetRequest(requestId, action) {
+      return API.request('/api/admin/users', {
+        method: 'PUT',
+        body: { request_id: requestId, action },
+      });
     },
   },
 };

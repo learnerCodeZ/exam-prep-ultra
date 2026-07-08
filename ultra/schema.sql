@@ -28,3 +28,11 @@ CREATE TABLE IF NOT EXISTS banks (
   updated_at  TEXT DEFAULT (datetime('now')),
   FOREIGN KEY (owner_id) REFERENCES users(id)
 );
+
+CREATE TABLE IF NOT EXISTS password_resets (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  user_id     INTEGER NOT NULL,
+  status      TEXT DEFAULT 'pending' CHECK(status IN ('pending', 'approved', 'rejected')),
+  created_at  TEXT DEFAULT (datetime('now')),
+  FOREIGN KEY (user_id) REFERENCES users(id)
+);
