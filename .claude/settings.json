@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c ' *)",
+      "Read(//tmp/**)",
+      "Bash(node -e \"const fs=require\\('fs'\\);const d=JSON.parse\\(fs.readFileSync\\('data/default.json','utf8'\\)\\);const q=d.questions.find\\(x=>x.type==='listening'\\);console.log\\(JSON.stringify\\(q,null,2\\)\\);\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const d=JSON.parse\\(fs.readFileSync\\('data/default.json','utf8'\\)\\);const q=d.questions.find\\(x=>x.type==='reading'\\);console.log\\(JSON.stringify\\(q,null,2\\)\\);\")",
+      "Bash(node -e ' *)",
+      "Bash(gh release *)",
+      "Bash(curl -s https://exam-prep-ultra.pages.dev/api/banks)",
+      "Bash(curl -s https://exam-prep-ultra.pages.dev/api/friends)",
+      "Bash(curl -s https://exam-prep-ultra.pages.dev/api/auth/me)"
+    ]
+  }
+}

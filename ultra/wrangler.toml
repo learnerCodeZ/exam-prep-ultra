@@ -1,0 +1,30 @@
+name = "exam-prep-ultra"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = "./"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "exam-prep-db"
+database_id = "e7c2a462-2b73-468b-8c4a-e1258509d3f5"
+
+[[kv_namespaces]]
+binding = "SESSION"
+id = "95a216028ef340a3a6fe3b9499b65ef6"
+
+[[kv_namespaces]]
+binding = "QUESTIONS"
+id = "96612472c34741da8383b075b0170a35"
+
+# Production 环境绑定（Pages deploy 会用这个）
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "exam-prep-db"
+database_id = "e7c2a462-2b73-468b-8c4a-e1258509d3f5"
+
+[[env.production.kv_namespaces]]
+binding = "SESSION"
+id = "95a216028ef340a3a6fe3b9499b65ef6"
+
+[[env.production.kv_namespaces]]
+binding = "QUESTIONS"
+id = "96612472c34741da8383b075b0170a35"

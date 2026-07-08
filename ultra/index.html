@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>期末刷题宝典 Ultra</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="header">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="menu-btn" onclick="toggleSidebar()" aria-label="打开题库菜单">☰</button>
+    <div>
+      <h1>期末刷题宝典</h1>
+      <div class="sub-info" id="hdrSub">加载中...</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div id="userArea"></div>
+    <button class="btn-help" onclick="openHelp()" title="使用帮助">?</button>
+    <button class="btn-import" onclick="openImport()">+ 导入</button>
+  </div>
+</div>
+
+<!-- 侧栏遮罩 -->
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<!-- 侧栏 -->
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h3><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> 题库</h3>
+    <button class="sidebar-close" onclick="toggleSidebar()">✕</button>
+  </div>
+  <div class="sidebar-body">
+    <div class="sidebar-section-label">题库列表</div>
+    <div class="sidebar-banks" id="sidebarBanks"></div>
+    <button class="sidebar-import" onclick="openImport();toggleSidebar()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      导入题库
+    </button>
+  </div>
+  <div class="sidebar-footer">
+    <div class="sidebar-stats" id="sidebarStats"></div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card total"><div class="num" id="stTotal">0</div><div class="lbl">总题数</div></div>
+    <div class="stat-card right"><div class="num" id="stRight">0</div><div class="lbl">已答对</div></div>
+    <div class="stat-card wrong"><div class="num" id="stWrong">0</div><div class="lbl">错题</div></div>
+    <div class="stat-card"><div class="num" id="stFav">0</div><div class="lbl">收藏</div></div>
+  </div>
+
+  <div class="mode-tabs">
+    <div class="mode-tab active" data-mode="practice" onclick="setMode('practice')">顺序练习</div>
+    <div class="mode-tab" data-mode="random" onclick="setMode('random')">随机刷题</div>
+    <div class="mode-tab" data-mode="wrong" onclick="setMode('wrong')">错题本</div>
+    <div class="mode-tab" data-mode="fav" onclick="setMode('fav')">收藏夹</div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div id="content"></div>
+</div>
+
+<div class="qmap-overlay" id="qmapOverlay" onclick="closeQmap(event)">
+  <div class="qmap-panel" onclick="event.stopPropagation()">
+    <h3 id="qmapTitle">题目导航</h3>
+    <div class="qmap-grid" id="qmapGrid"></div>
+    <button class="qmap-close" onclick="closeQmap()">关闭</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="importOverlay" onclick="closeImport(event)">
+  <div class="modal-panel" onclick="event.stopPropagation()">
+    <h3>导入题库</h3>
+    <div id="importBody">
+      <p style="font-size:13px;margin-bottom:10px">支持 Markdown (.md)、Word (.docx)、PDF (.pdf) 格式，或直接粘贴文本。</p>
+      <input type="file" id="importFile" accept=".md,.docx,.pdf" style="margin-bottom:10px">
+      <div style="font-size:12px;color:#888;margin-bottom:4px">或粘贴文本：</div>
+      <textarea id="importText" placeholder="将题目内容粘贴到此处，点击下方解析..." style="width:100%;height:120px;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;margin-bottom:8px;resize:vertical;font-family:inherit"></textarea>
+      <button onclick="parseImportedText()" style="padding:6px 16px;border:1px solid #4a90d9;background:#ebf3fc;color:#4a90d9;border-radius:6px;cursor:pointer;font-size:13px;margin-bottom:10px">解析粘贴内容</button>
+      <div id="importStatus" style="display:none;font-size:13px;color:#4a90d9;margin-bottom:8px"></div>
+      <input type="text" id="importName" placeholder="题库名称（新题库用）" style="width:100%;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <label style="font-size:13px;white-space:nowrap">导入到：</label>
+        <select id="importTarget" style="flex:1;padding:8px;border:1px solid #d0d0d0;border-radius:6px;font-size:13px">
+          <option value="__new__">新建题库</option>
+        </select>
+      </div>
+      <div id="importPreview" style="display:none"></div>
+      <div id="importActions" style="display:none;margin-top:10px">
+        <button onclick="confirmImport()" style="padding:8px 20px;background:#4a90d9;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">确认导入</button>
+        <button onclick="cancelImport()" style="padding:8px 20px;border:1px solid #d0d0d0;border-radius:6px;cursor:pointer;font-size:13px;margin-left:8px">取消</button>
+      </div>
+    </div>
+    <button class="modal-close" onclick="closeImport()">关闭</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="helpOverlay" onclick="closeHelp(event)">
+  <div class="modal-panel" onclick="event.stopPropagation()" style="max-width:480px">
+    <h3>使用帮助</h3>
+    <div class="help-content">
+      <div class="help-section">
+        <h4>快速开始</h4>
+        <ol>
+          <li>打开页面即可刷题，默认题库已内置</li>
+          <li>点左上角 ☰ 打开侧栏，切换题库</li>
+          <li>选答案后立即显示对错和正确答案</li>
+        </ol>
+      </div>
+      <div class="help-section">
+        <h4>导入题库</h4>
+        <ul>
+          <li><b>文件导入</b>：点右上角"+ 导入"，上传 .md / .docx / .pdf 文件</li>
+          <li><b>粘贴导入</b>：在导入弹窗的文本框粘贴题目内容，点"解析粘贴内容"</li>
+          <li><b>追加题目</b>：导入时选择"导入到"已有题库，或点侧栏题库旁的 + 按钮</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>支持的题目格式</h4>
+        <ul>
+          <li><b>单选题</b>：题号 + 题干 + ABCD 选项 + 答案</li>
+          <li><b>多选题</b>：同上，答案为多字母（如 CD、BCD）</li>
+          <li><b>判断题</b>：题号 + 题干 + 答案：对/错</li>
+          <li><b>英语题型</b>：听力、段落匹配、选词填空、阅读（需用 Markdown 格式）</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h4>快捷键</h4>
+        <table class="help-keys">
+          <tr><td><kbd>1</kbd>-<kbd>4</kbd></td><td>选择选项</td></tr>
+          <tr><td><kbd>←</kbd> <kbd>→</kbd></td><td>上一题 / 下一题</td></tr>
+          <tr><td><kbd>F</kbd></td><td>收藏 / 取消收藏</td></tr>
+          <tr><td><kbd>A</kbd>-<kbd>O</kbd></td><td>选词填空选词</td></tr>
+        </table>
+      </div>
+      <div class="help-section">
+        <h4>其他功能</h4>
+        <ul>
+          <li><b>编辑答案</b>：答题后点 ✎ 可修改正确答案</li>
+          <li><b>重命名题库</b>：侧栏题库旁 ✎ 按钮</li>
+          <li><b>题目导航</b>：点中间的题号，跳转到任意题目</li>
+        </ul>
+      </div>
+    </div>
+    <button class="modal-close" onclick="closeHelp()">关闭</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="editAnswerOverlay" onclick="closeEditAnswer(event)">
+  <div class="modal-panel" onclick="event.stopPropagation()">
+    <h3>编辑答案</h3>
+    <div id="editAnswerBody"></div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button onclick="confirmEditAnswer()" style="padding:8px 20px;background:#4a90d9;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px">保存</button>
+      <button onclick="resetEditAnswer()" style="padding:8px 20px;border:1px solid #ffccc7;background:#fff2f0;color:#cf1322;border-radius:6px;cursor:pointer;font-size:13px">恢复默认</button>
+      <button onclick="closeEditAnswer()" style="padding:8px 20px;border:1px solid #d0d0d0;border-radius:6px;cursor:pointer;font-size:13px">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- 认证弹窗 -->
+<div class="modal-overlay" id="authOverlay" onclick="AuthUI.close(event)">
+  <div class="modal-panel" onclick="event.stopPropagation()" style="max-width:380px">
+    <div class="auth-tabs">
+      <div class="auth-tab active" data-tab="login" onclick="AuthUI.switchTab('login')">登录</div>
+      <div class="auth-tab" data-tab="register" onclick="AuthUI.switchTab('register')">注册</div>
+    </div>
+    <div id="authError" class="auth-error" style="display:none"></div>
+    <div id="authLoginForm">
+      <div class="auth-field">
+        <label>邮箱</label>
+        <input type="email" id="loginEmail" placeholder="请输入邮箱" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>密码</label>
+        <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+      </div>
+      <button class="auth-submit" onclick="AuthUI.handleLogin()">登 录</button>
+    </div>
+    <div id="authRegisterForm" style="display:none">
+      <div class="auth-field">
+        <label>邮箱</label>
+        <input type="email" id="regEmail" placeholder="请输入邮箱" autocomplete="email">
+      </div>
+      <div class="auth-field">
+        <label>昵称</label>
+        <input type="text" id="regNickname" placeholder="给自己取个名字" autocomplete="nickname">
+      </div>
+      <div class="auth-field">
+        <label>密码</label>
+        <input type="password" id="regPassword" placeholder="至少6位" autocomplete="new-password">
+      </div>
+      <div class="auth-field">
+        <label>确认密码</label>
+        <input type="password" id="regPassword2" placeholder="再次输入密码" autocomplete="new-password">
+      </div>
+      <button class="auth-submit" onclick="AuthUI.handleRegister()">注 册</button>
+    </div>
+    <button class="modal-close" onclick="AuthUI.close()">关闭</button>
+  </div>
+</div>
+
+<!-- 好友弹窗 -->
+<div class="modal-overlay" id="friendsOverlay" onclick="FriendsUI.close(event)">
+  <div class="modal-panel" onclick="event.stopPropagation()" style="max-width:440px">
+    <h3>好友</h3>
+    <div class="friend-search">
+      <input type="text" id="friendSearchInput" placeholder="搜索用户（昵称或邮箱）" oninput="FriendsUI.search()">
+    </div>
+    <div id="friendSearchResult" class="friend-search-result"></div>
+    <div id="pendingList"></div>
+    <div class="friends-section-label">我的好友</div>
+    <div id="friendsList"></div>
+    <button class="modal-close" onclick="FriendsUI.close()">关闭</button>
+  </div>
+</div>
+
+<!-- 管理员面板 -->
+<div class="modal-overlay" id="adminOverlay" onclick="AdminUI.close(event)">
+  <div class="modal-panel" onclick="event.stopPropagation()" style="max-width:600px">
+    <h3>管理员面板</h3>
+    <div class="admin-section">
+      <h4>用户管理</h4>
+      <table class="admin-table">
+        <thead><tr><th>ID</th><th>昵称</th><th>邮箱</th><th>角色</th><th>题库数</th><th>操作</th></tr></thead>
+        <tbody id="adminUsersBody"></tbody>
+      </table>
+    </div>
+    <div class="admin-section">
+      <h4>题库管理</h4>
+      <table class="admin-table">
+        <thead><tr><th>ID</th><th>名称</th><th>所有者</th><th>可见性</th><th>操作</th></tr></thead>
+        <tbody id="adminBanksBody"></tbody>
+      </table>
+    </div>
+    <button class="modal-close" onclick="AdminUI.close()">关闭</button>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/auth-ui.js"></script>
+<script src="js/friends-ui.js"></script>
+<script src="js/admin-ui.js"></script>
+<script src="lib/mammoth.min.js"></script>
+<script src="lib/pdf.min.js"></script>
+<script src="js/parser-md.js"></script>
+<script src="js/parser-docx.js"></script>
+<script src="js/parser-pdf.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

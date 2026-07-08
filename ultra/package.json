@@ -1,0 +1,32 @@
+{
+  "name": "ultra",
+  "version": "1.0.0",
+  "description": "打开网址就能刷题，支持导入 Word / Markdown / PDF / 粘贴文本题库，即选即判，刷到刻进 DNA。",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib"
+  },
+  "scripts": {
+    "dev": "wrangler pages dev .",
+    "deploy": "wrangler pages deploy . --project-name=exam-prep-ultra --branch=main --commit-dirty=true",
+    "db:schema": "wrangler d1 execute exam-prep-db --remote --file=schema.sql",
+    "db:seed": "wrangler d1 execute exam-prep-db --remote --file=seed.sql",
+    "db:reset": "wrangler d1 execute exam-prep-db --remote --command=\"DROP TABLE IF EXISTS banks; DROP TABLE IF EXISTS friends; DROP TABLE IF EXISTS users;\" && npm run db:schema && npm run db:seed",
+    "gen:admin": "node scripts/gen-admin-hash.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/learnerCodeZ/exam-prep-ultra.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/learnerCodeZ/exam-prep-ultra/issues"
+  },
+  "homepage": "https://github.com/learnerCodeZ/exam-prep-ultra#readme",
+  "devDependencies": {
+    "wrangler": "^4.107.0"
+  }
+}
