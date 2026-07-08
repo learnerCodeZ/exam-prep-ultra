@@ -18,38 +18,46 @@
 
 ## 代码结构
 
-### 前端
+### 前端（ultra/）
 
-- `index.html` — 单页应用入口
-- `css/style.css` — 全部样式
-- `js/app.js` — 主逻辑：渲染、交互、状态管理
-- `js/api.js` — API 统一封装（fetch + 错误处理 + 自动降级）
-- `js/auth-ui.js` — 登录/注册弹窗
-- `js/friends-ui.js` — 好友管理弹窗
-- `js/admin-ui.js` — 管理员面板
-- `js/parser-md.js` — Markdown/纯文本题库解析（含单选、多选、判断、听力、匹配、填空、阅读）
-- `js/parser-docx.js` — Word 题库解析（调用 mammoth.js）
-- `js/parser-pdf.js` — PDF 题库解析（调用 pdf.js）
-- `lib/` — 第三方库（mammoth.min.js, pdf.min.js, pdf.worker.min.js）
-- `data/default.json` — 内置 fallback 题库
+- `ultra/index.html` — 单页应用入口
+- `ultra/css/style.css` — 全部样式
+- `ultra/js/app.js` — 主逻辑：渲染、交互、状态管理
+- `ultra/js/api.js` — API 统一封装（fetch + 错误处理 + 自动降级）
+- `ultra/js/auth-ui.js` — 登录/注册弹窗
+- `ultra/js/friends-ui.js` — 好友管理弹窗
+- `ultra/js/admin-ui.js` — 管理员面板
+- `ultra/js/parser-md.js` — Markdown/纯文本题库解析（含单选、多选、判断、听力、匹配、填空、阅读）
+- `ultra/js/parser-docx.js` — Word 题库解析（调用 mammoth.js）
+- `ultra/js/parser-pdf.js` — PDF 题库解析（调用 pdf.js）
+- `ultra/lib/` — 第三方库（mammoth.min.js, pdf.min.js, pdf.worker.min.js）
+- `ultra/data/default.json` — 内置 fallback 题库
 
-### 后端
+### 后端（ultra/）
 
-- `_worker.js` — Workers 统一路由入口
-- `functions/_middleware.js` — 认证中间件（解析 session cookie → 查 KV → 查 D1 → 注入 user）
-- `functions/api/auth/` — register, login, logout, me
-- `functions/api/banks/` — index, [id], [id]/questions
-- `functions/api/users/` — search
-- `functions/api/friends/` — index, request, accept, reject
-- `functions/api/admin/` — users, banks
+- `ultra/_worker.js` — Workers 统一路由入口
+- `ultra/functions/_middleware.js` — 认证中间件（解析 session cookie → 查 KV → 查 D1 → 注入 user）
+- `ultra/functions/api/auth/` — register, login, logout, me
+- `ultra/functions/api/banks/` — index, [id], [id]/questions
+- `ultra/functions/api/users/` — search
+- `ultra/functions/api/friends/` — index, request, accept, reject
+- `ultra/functions/api/admin/` — users, banks
 
-### 配置 & 数据
+### 配置 & 数据（ultra/）
 
-- `wrangler.toml` — Cloudflare 配置（D1 + KV 绑定）
-- `schema.sql` — D1 建表 SQL（users, friends, banks）
-- `seed.sql` — 种子数据（管理员 + 默认题库）
-- `scripts/gen-admin-hash.js` — 生成管理员密码 PBKDF2 哈希
-- `_redirects` — SPA 路由规则
+- `ultra/wrangler.toml` — Cloudflare 配置（D1 + KV 绑定）
+- `ultra/schema.sql` — D1 建表 SQL（users, friends, banks）
+- `ultra/seed.sql` — 种子数据（管理员 + 默认题库）
+- `ultra/scripts/gen-admin-hash.js` — 生成管理员密码 PBKDF2 哈希
+- `ultra/_redirects` — SPA 路由规则
+
+### 文档（根目录）
+
+- `README.md` — 项目说明
+- `AGENTS.md` — 开发指南（本文件）
+- `docs/D_ultra/DEPLOY.md` — 部署指南
+- `docs/v1.0/PRD.md` — 产品需求文档
+- `notes/` — 开发笔记
 
 ## 数据格式
 

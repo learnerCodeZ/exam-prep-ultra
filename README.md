@@ -140,7 +140,18 @@ ultra/
 ├── data/
 │   ├── default.json        — 内置默认题库
 │   └── sample-bank.md      — 题库格式示例
-├── docs/                   — 文档
+└── scripts/
+    └── gen-admin-hash.js   — 生成管理员密码哈希
+```
+
+根目录文档：
+
+```
+├── README.md               — 项目说明
+├── AGENTS.md               — 开发指南
+├── docs/
+│   ├── D_ultra/DEPLOY.md   — 部署指南
+│   └── v1.0/PRD.md         — 产品需求文档
 └── notes/                  — 开发笔记
 ```
 
