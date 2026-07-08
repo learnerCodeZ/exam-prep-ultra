@@ -535,6 +535,7 @@ npx wrangler pages deploy . --project-name=exam-prep-ultra --branch=main --commi
 | 8 | Cookie 本地不生效 | `wrangler pages dev` 默认用 HTTP，Cookie 设了 `Secure` | 本地测试时临时去掉 Secure 或用 `--https` 参数 |
 | 9 | 文件路径大小写 | Linux 环境区分大小写（Cloudflare 构建环境是 Linux） | 确保 import 路径与实际文件名大小写一致 |
 | 10 | npoint.io 迁移 | 旧数据在 npoint.io 上，用户也有本地缓存 | 先上传 default.json 到 KV，再改前端代码指向 API |
+| 11 | git push 报 schannel 错误 | Windows git 默认用 schannel 加密，与本地代理（如 Clash 7890）TLS 握手不兼容，报 `failed to receive handshake` | `git config --global http.sslBackend openssl` 改用 openssl 后端，一劳永逸 |
 
 ---
 
