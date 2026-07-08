@@ -109,6 +109,26 @@ npx wrangler pages deploy . --project-name=exam-prep-ultra
 
 首次部署会自动创建 Pages 项目。部署成功后 Cloudflare 会给出访问 URL。
 
+### 部署后可访问性
+
+- 部署后 **7×24 小时随时可访问**，无需保持本地电脑开机
+- Cloudflare Pages 是云端托管，不是本地服务器，关机断网都不影响线上服务
+- 生产地址：`https://exam-prep-ultra.pages.dev/`
+
+### ⚠️ git push ≠ 自动部署
+
+本项目未配置 GitHub Actions CI，**git push 不会触发自动部署**。每次修改代码后，需要手动执行部署命令才能让线上生效：
+
+```bash
+npm run deploy
+```
+
+| 操作 | 是否更新线上 |
+|------|------------|
+| `git push` | ❌ 只更新 GitHub 仓库 |
+| `npm run dev` | ❌ 只启动本地开发服务器 |
+| `npm run deploy` | ✅ 更新线上生产环境 |
+
 ---
 
 ## 第六步：生产环境验证
