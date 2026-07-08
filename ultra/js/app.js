@@ -1078,13 +1078,13 @@ window.addEventListener('auth:logout', () => {
     const res = await API.auth.me();
     if (res.user) {
       state.user = res.user;
-      updateUserUI();
       await loadApiBanks();
     }
   } catch (e) {
     // 未登录或离线，正常继续
-    updateUserUI();
   }
+  // 无论是否登录都要渲染用户 UI（登录按钮 / 用户信息）
+  updateUserUI();
 
   const activeId = localStorage.getItem(LS.activeBank) || 'default';
   await loadBank(activeId);
