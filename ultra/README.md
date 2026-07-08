@@ -171,7 +171,8 @@ npm run gen:admin  # 生成管理员密码哈希
 
 ## 文档
 
-- [部署笔记](docs/D_ultra/DEPLOY.md) — 部署流程、Wrangler 命令、种子数据说明
+- [部署笔记](notes/Notes/Cloudflare-部署笔记.md) — Cloudflare 产品、项目架构、部署全流程、踩坑点
+- [部署指南](docs/D_ultra/DEPLOY.md) — 部署流程、Wrangler 命令、种子数据说明
 - [分批实施笔记](notes/notes1_ultra_2.0/分批实施笔记.md) — 全栈升级 4 批实施思路与设计决策
 - [AGENTS.md](AGENTS.md) — 开发指南
 
