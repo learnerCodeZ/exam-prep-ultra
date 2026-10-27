@@ -4,3 +4,9 @@ Temp/
 *.pyc
 __pycache__
 .DS_Store
+
+# 本地 Pyodide（实际文件在下载文件夹，通过 junction 挂载）
+lib/pyodide/
+
+# 题库抓取中间产物（构建 python-programming.json 用，不提交/不部署）
+data/_scrape/

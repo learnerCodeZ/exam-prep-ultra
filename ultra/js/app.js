@@ -3,6 +3,13 @@
 // npoint 题库地址（M5 部署时填入真实 URL；为空则直接用 default.json）
 const NPOINT_URL = '';
 
+// 内置题库（随仓库发布的 data/ JSON）
+const BUILTIN_BANKS = {
+  default: { name: '大学英语4（默认）', path: 'data/default.json' },
+  'python-programming': { name: 'python程序设计', path: 'data/python-programming.json' },
+};
+const builtinCounts = {};
+
 // localStorage keys
 const LS = {
   banks: 'ultra_banks',          // 用户导入的题库列表
@@ -21,9 +28,11 @@ let apiBanks = [];
 let state = {
   mode: 'practice',
   typeName: '',    // 当前选中的题型名称
+  chapter: 'all',  // 当前选中的章节
   idx: 0,
   selected: null,
   answered: false,
+  revealed: false,   // 是否已展开答案（查看答案）
   list: [],
   bank: null,        // {id, name, questions}
   questions: [],
@@ -37,8 +46,8 @@ let state = {
 // ---------- 题库加载 ----------
 async function loadBank(bankId) {
   let bank = null;
-  if (bankId === 'default') {
-    bank = await loadDefaultBank();
+  if (BUILTIN_BANKS[bankId]) {
+    bank = await loadBuiltinBank(bankId);
   } else {
     // 1. 先查 localStorage 本地题库
     const banks = getUserBanks();
@@ -87,6 +96,7 @@ async function loadBank(bankId) {
   }
   state.bank = bank;
   state.questions = bank.questions;
+  if (BUILTIN_BANKS[bank.id]) builtinCounts[bank.id] = bank.questions.length;
   state.wrong = JSON.parse(localStorage.getItem(LS.wrong(bank.id)) || '{}');
   state.right = JSON.parse(localStorage.getItem(LS.right(bank.id)) || '{}');
   state.fav = JSON.parse(localStorage.getItem(LS.fav(bank.id)) || '{}');
@@ -95,23 +105,27 @@ async function loadBank(bankId) {
   // 选择该题库第一个可用题型
   const firstTypeName = getTypeNames()[0] || '';
   state.typeName = firstTypeName;
+  state.chapter = 'all';
   state.mode = 'practice';
   buildList();
+  renderChapters();
   renderTabs();
   renderBankSelect();
   updateHeader();
   updateStats();
 }
 
-async function loadDefaultBank() {
-  // 1. 尝试 npoint（线上题库）
-  if (NPOINT_URL) {
+async function loadBuiltinBank(id) {
+  const meta = BUILTIN_BANKS[id];
+  // 1. 尝试 npoint（线上题库，仅默认题库）
+  if (id === 'default' && NPOINT_URL) {
     try {
       const cached = localStorage.getItem(LS.cacheBank('default'));
       const res = await fetch(NPOINT_URL);
       if (res.ok) {
         const bank = await res.json();
         if (bank && bank.questions && bank.questions.length) {
+          bank.id = id;
           localStorage.setItem(LS.cacheBank('default'), JSON.stringify(bank));
           return bank;
         }
@@ -119,14 +133,42 @@ async function loadDefaultBank() {
       throw new Error('npoint fetch failed');
     } catch (e) {
       // 降级到缓存或内置
+      const cached = localStorage.getItem(LS.cacheBank('default'));
       if (cached) return JSON.parse(cached);
     }
   }
-  // 2. 内置 default.json fallback
-  const res = await fetch('data/default.json');
-  if (res.ok) return await res.json();
-  console.error('No default bank available');
-  return { id: 'default', name: '大学英语4（默认）', questions: [] };
+  // 2. 仓库内置 JSON
+  try {
+    const res = await fetch(meta.path, { cache: 'no-store' });
+    if (res.ok) {
+      const bank = await res.json();
+      // 题库 id 统一为内置 key（历史 default.json 用的是 college-english）
+      if (bank.id !== id) {
+        if (id === 'default') migrateBankStorage(bank.id, id);
+        bank.id = id;
+      }
+      bank.name = bank.name || meta.name;
+      return bank;
+    }
+  } catch (e) {
+    console.warn('内置题库加载失败:', id, e.message);
+  }
+  // 3. 缓存兜底
+  const cached = localStorage.getItem(LS.cacheBank(id));
+  if (cached) {
+    try { return JSON.parse(cached); } catch (e) {}
+  }
+  return { id, name: meta.name, questions: [] };
+}
+
+function migrateBankStorage(oldId, newId) {
+  for (const k of ['wrong', 'right', 'fav', 'answers']) {
+    const oldKey = LS[k](oldId);
+    const newKey = LS[k](newId);
+    if (!localStorage.getItem(newKey) && localStorage.getItem(oldKey)) {
+      localStorage.setItem(newKey, localStorage.getItem(oldKey));
+    }
+  }
 }
 
 function getUserBanks() {
@@ -154,7 +196,12 @@ function renderBankSelect() {
   const container = document.getElementById('sidebarBanks');
   const banks = getUserBanks();
   const activeId = state.bank ? state.bank.id : 'default';
-  let html = renderBankItem('default', '大学英语4（默认）', state.questions.length, activeId === 'default', false);
+  let html = '';
+  for (const id of Object.keys(BUILTIN_BANKS)) {
+    const meta = BUILTIN_BANKS[id];
+    const count = activeId === id ? state.questions.length : (builtinCounts[id] ?? null);
+    html += renderBankItem(id, meta.name, count, activeId === id, false);
+  }
   for (const b of banks) {
     html += renderBankItem(b.id, b.name, b.questions ? b.questions.length : 0, activeId === b.id, true);
   }
@@ -193,12 +240,13 @@ async function loadApiBanks() {
 
 function renderBankItem(id, name, count, isActive, deletable) {
   const iconChar = isActive ? '📖' : (id === 'default' ? '📚' : '📘');
-  const canRename = id !== 'default';
+  const canRename = id !== 'default' && !BUILTIN_BANKS[id];
+  const countText = count == null ? '内置题库' : `${count} 题`;
   return `<div class="sidebar-bank-item ${isActive?'active':''}" onclick="switchBank('${id}')">
     <div class="bank-icon">${iconChar}</div>
     <div class="bank-info">
       <div class="bank-name">${escapeHtml(name)}</div>
-      <div class="bank-count">${count} 题</div>
+      <div class="bank-count">${countText}</div>
     </div>
     ${canRename ? `<button class="bank-rename" onclick="event.stopPropagation();startRename('${id}','${escapeHtml(name)}')" title="重命名">✎</button>` : ''}
     <button class="bank-append" onclick="event.stopPropagation();openAppend('${id}')" title="追加题目">+</button>
@@ -237,17 +285,71 @@ function getTypeNames() {
   return seen;
 }
 
+function getChapters() {
+  const seen = [];
+  for (const q of state.questions) {
+    if (q.chapter && !seen.includes(q.chapter)) seen.push(q.chapter);
+  }
+  return seen;
+}
+
+function getChapterQuestions() {
+  if (state.chapter === 'all') return state.questions;
+  return state.questions.filter(q => q.chapter === state.chapter);
+}
+
+function renderChapters() {
+  const bar = document.getElementById('chapterBar');
+  if (!bar) return;
+  const chapters = getChapters();
+  if (chapters.length <= 1) {
+    bar.style.display = 'none';
+    bar.innerHTML = '';
+    return;
+  }
+  bar.style.display = 'flex';
+  const chips = [`<div class="chapter-chip ${state.chapter === 'all' ? 'active' : ''}" onclick="switchChapter('all')">全部<span class="count">${state.questions.length}</span></div>`];
+  for (const ch of chapters) {
+    const count = state.questions.filter(q => q.chapter === ch).length;
+    chips.push(`<div class="chapter-chip ${state.chapter === ch ? 'active' : ''}" onclick="switchChapter('${escapeHtml(ch)}')">${escapeHtml(ch)}<span class="count">${count}</span></div>`);
+  }
+  bar.innerHTML = chips.join('');
+}
+
+function switchChapter(ch) {
+  state.chapter = ch;
+  if (ch !== 'all') {
+    const names = [];
+    for (const q of state.questions) {
+      if (q.chapter !== ch) continue;
+      const tn = q.typeName || '未分类';
+      if (!names.includes(tn)) names.push(tn);
+    }
+    if (!names.includes(state.typeName)) state.typeName = names[0] || '';
+  }
+  renderChapters();
+  renderTabs();
+  buildList();
+  updateHeader();
+}
+
 function updateHeader() {
   const total = state.questions.length;
   const bankName = state.bank ? state.bank.name : '大学英语4（默认）';
-  document.getElementById('hdrSub').textContent = `${bankName} · 共 ${total} 题`;
+  if (state.chapter !== 'all') {
+    const n = getChapterQuestions().length;
+    document.getElementById('hdrSub').textContent = `${bankName} · ${state.chapter} · 共 ${n} 题`;
+  } else {
+    document.getElementById('hdrSub').textContent = `${bankName} · 共 ${total} 题`;
+  }
 }
 
 function renderTabs() {
   const tabs = document.getElementById('tabs');
+  const scope = getChapterQuestions();
   let html = '';
   for (const tn of getTypeNames()) {
-    const items = state.questions.filter(q => (q.typeName || '未分类') === tn);
+    const items = scope.filter(q => (q.typeName || '未分类') === tn);
     if (items.length === 0) continue;
     html += `<div class="tab ${tn === state.typeName ? 'active' : ''}" data-type="${escapeHtml(tn)}" onclick="switchType('${escapeHtml(tn)}')">
       ${escapeHtml(tn)}<span class="count">${items.length}题</span></div>`;
@@ -256,7 +358,7 @@ function renderTabs() {
 }
 
 function buildList() {
-  let arr = state.questions.filter(q => (q.typeName || '未分类') === state.typeName);
+  let arr = getChapterQuestions().filter(q => (q.typeName || '未分类') === state.typeName);
   if (state.mode === 'wrong') {
     arr = arr.filter(q => state.wrong[q.id]);
   } else if (state.mode === 'fav') {
@@ -268,6 +370,7 @@ function buildList() {
   state.idx = 0;
   state.selected = null;
   state.answered = false;
+  state.revealed = false;
   render();
 }
 
@@ -303,7 +406,9 @@ function render() {
     return;
   }
   const q = state.list[state.idx];
-  if (q.wordBank) renderFillBlank(q, content);
+  if (q.type === 'programming') renderProgramming(q, content);
+  else if (q.type === 'freefill') renderFreeFill(q, content);
+  else if (q.wordBank) renderFillBlank(q, content);
   else renderChoice(q, content);
   updateStats();
 }
@@ -342,7 +447,7 @@ function renderChoice(q, content) {
   const edited = isAnswerEdited(q);
   content.innerHTML = `
     <div class="card">
-      <span class="q-tag">${escapeHtml(q.typeName)}${q.number ? ' · 第'+q.number+'题' : ''}${q.passage?' · '+escapeHtml(String(q.passage)):''}${edited?' ✎':''}</span>
+      <span class="q-tag">${questionTag(q)}</span>
       ${passageHtml}
       <div class="q-stem">${stemHtml}</div>
       ${optionsHtml}
@@ -350,6 +455,7 @@ function renderChoice(q, content) {
       <div class="actions">
         <button class="btn-next" onclick="nextQ()">下一题</button>
         <button class="btn-fav" onclick="toggleFav()">${isFav?'★ 收藏中':'☆ 收藏'}</button>
+        <button class="btn-reveal" onclick="toggleReveal()">${state.revealed?'隐藏答案':'查看答案'}</button>
         <button class="btn-edit" onclick="openEditAnswer()">✎ 编辑答案</button>
       </div>
       <div class="nav-bar">
@@ -361,7 +467,20 @@ function renderChoice(q, content) {
 
   if (state.answered && state.selected !== null) {
     showResult(q);
+  } else if (state.revealed) {
+    showRevealed(q);
   }
+}
+
+function questionTag(q) {
+  const parts = [];
+  if (q.chapter) parts.push(q.chapter);
+  if (q.typeName) parts.push(q.typeName);
+  if (q.kind && q.kind !== q.typeName) parts.push(q.kind);
+  if (q.number) parts.push('第' + q.number + '题');
+  if (q.passage && typeof q.passage === 'string' && q.passage.length <= 20) parts.push(q.passage);
+  if (isAnswerEdited(q)) parts.push('✎');
+  return escapeHtml(parts.join(' · '));
 }
 
 // ---------- 选词填空 ----------
@@ -504,6 +623,46 @@ function restoreFillResult(q) {
   }
 }
 
+// ---------- 自由填空（只看答案，不判对错）----------
+function renderFreeFill(q, content) {
+  const blanks = q.blanks || {};
+  let passage = escapeHtml(q.passage || '');
+  passage = passage.replace(/\{\{(\d+)\}\}/g, (m, num) => {
+    const ans = blanks[num] ?? '';
+    if (state.revealed) return `<span class="ff-blank revealed">${escapeHtml(ans)}</span>`;
+    return `<span class="ff-blank" onclick="toggleReveal()" title="点击查看答案">____</span>`;
+  });
+
+  const isFav = state.fav[q.id];
+  const answerText = Object.keys(blanks)
+    .sort((a, b) => Number(a) - Number(b))
+    .map(n => `(${n}) ${escapeHtml(blanks[n])}`)
+    .join('　');
+
+  content.innerHTML = `
+    <div class="card">
+      <span class="q-tag">${questionTag(q)}</span>
+      ${(q.images && q.images.length) ? q.images.map(src =>
+        `<div class="ff-image"><img src="${escapeHtml(src)}" alt="题目配图"></div>`).join('') : ''}
+      <div class="ff-passage" id="ffPassage">${passage}</div>
+      <div class="answer-box show ${state.revealed ? 'correct' : ''}">
+        ${state.revealed
+          ? `<span class="label">答案</span> ${answerText}`
+          : '<span class="label">提示</span> 点击“查看答案”或直接点击空格显示答案'}
+      </div>
+      <div class="actions">
+        <button class="btn-next" onclick="nextQ()">下一题</button>
+        <button class="btn-fav" onclick="toggleFav()">${isFav?'★ 收藏中':'☆ 收藏'}</button>
+        <button class="btn-reveal" onclick="toggleReveal()">${state.revealed?'隐藏答案':'查看答案'}</button>
+      </div>
+      <div class="nav-bar">
+        <button onclick="prevQ()" ${state.idx===0?'disabled':''}>上一题</button>
+        <span class="nav-pos" onclick="openQmap()">${state.idx+1} / ${state.list.length}</span>
+        <button onclick="nextQ()" ${state.idx===state.list.length-1?'disabled':''}>下一题</button>
+      </div>
+    </div>`;
+}
+
 // ---------- 答案管理 ----------
 function getAnswer(q) {
   if (q.wordBank) {
@@ -579,8 +738,36 @@ function showResult(q) {
     if (correct) { state.right[q.id] = true; delete state.wrong[q.id]; }
     else state.wrong[q.id] = true;
   }
+  if (q.answerNote) {
+    box.innerHTML += `<div class="answer-note">${escapeHtml(q.answerNote)}</div>`;
+  }
   saveState();
   updateStats();
+}
+
+// 查看 / 隐藏答案（不判分、不记入错题）
+function toggleReveal() {
+  state.revealed = !state.revealed;
+  render();
+}
+
+function showRevealed(q) {
+  const answer = getAnswer(q);
+  document.querySelectorAll('.option, .match-opt').forEach(el => {
+    el.classList.remove('correct', 'wrong', 'selected');
+    if (answer && el.dataset.l === answer) el.classList.add('correct');
+  });
+  const box = document.getElementById('answerBox');
+  if (!box) return;
+  const ansOpt = (q.options || []).find(o => o.letter === answer);
+  const detail = answer
+    ? (ansOpt ? `${answer}. ${escapeHtml(ansOpt.text)}` : escapeHtml(String(answer)))
+    : '无答案';
+  box.className = 'answer-box show';
+  box.innerHTML = `<span class="label">答案</span> ${detail}`;
+  if (q.answerNote) {
+    box.innerHTML += `<div class="answer-note">${escapeHtml(q.answerNote)}</div>`;
+  }
 }
 
 // ---------- 收藏 / 导航 ----------
@@ -597,6 +784,7 @@ function nextQ() {
     state.idx++;
     state.selected = null;
     state.answered = false;
+    state.revealed = false;
     render();
   }
 }
@@ -606,6 +794,7 @@ function prevQ() {
     state.idx--;
     state.selected = null;
     state.answered = false;
+    state.revealed = false;
     render();
   }
 }
@@ -620,17 +809,35 @@ function openQmap() {
   const grid = document.getElementById('qmapGrid');
   const title = document.getElementById('qmapTitle');
   const q = state.list[state.idx];
-  title.textContent = (q.typeName || '题目') + ' · 题目导航';
-  let html = '';
+  title.textContent = `${q.typeName || '题目'} · 共 ${state.list.length} 题 · 题目导航`;
+
+  const groups = [];
   state.list.forEach((item, idx) => {
-    let cls = 'qmap-item';
-    if (idx === state.idx) cls += ' current';
-    else if (state.right[item.id]) cls += ' done-right';
-    else if (state.wrong[item.id]) cls += ' done-wrong';
-    let label = idx + 1;
-    if (item.number) label = item.number;
-    html += `<div class="${cls}" onclick="jumpTo(${idx})">${label}</div>`;
+    const chapter = item.chapter || '未分类';
+    let group = groups[groups.length - 1];
+    if (!group || group.chapter !== chapter) {
+      group = { chapter, items: [] };
+      groups.push(group);
+    }
+    group.items.push({ item, idx });
   });
+
+  let html = '';
+  for (const group of groups) {
+    if (groups.length > 1) {
+      html += `<div class="qmap-group-title">${escapeHtml(group.chapter)}<span>${group.items.length} 题</span></div>`;
+    }
+    html += '<div class="qmap-items">';
+    for (const { item, idx } of group.items) {
+      let cls = 'qmap-item';
+      if (idx === state.idx) cls += ' current';
+      else if (state.right[item.id]) cls += ' done-right';
+      else if (state.wrong[item.id]) cls += ' done-wrong';
+      const label = item.number || idx + 1;
+      html += `<div class="${cls}" onclick="jumpTo(${idx})">${label}</div>`;
+    }
+    html += '</div>';
+  }
   grid.innerHTML = html;
   overlay.classList.add('show');
 }
@@ -644,6 +851,7 @@ function jumpTo(idx) {
   state.idx = idx;
   state.selected = null;
   state.answered = false;
+  state.revealed = false;
   document.getElementById('qmapOverlay').classList.remove('show');
   render();
 }
@@ -1014,7 +1222,8 @@ document.addEventListener('keydown', (e) => {
   if (overlays.some(id => document.getElementById(id).classList.contains('show'))) return;
   if (state.list.length === 0) return;
   const q = state.list[state.idx];
-  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (['INPUT', 'SELECT', 'TEXTAREA'].includes(e.target.tagName)) return;
+  if (q.type === 'programming') return;
 
   // A-O 字母键选词（选词填空）
   if (/^[A-O]$/i.test(e.key) && !state.answered && q.wordBank) {
