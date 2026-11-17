@@ -47,15 +47,14 @@
 <div class="container">
   <div class="stats-row" id="statsRow">
     <div class="stat-card total"><div class="num" id="stTotal">0</div><div class="lbl">总题数</div></div>
-    <div class="stat-card right"><div class="num" id="stRight">0</div><div class="lbl">已答对</div></div>
-    <div class="stat-card wrong"><div class="num" id="stWrong">0</div><div class="lbl">错题</div></div>
+    <div class="stat-card right" hidden><div class="num" id="stRight">0</div><div class="lbl">已答对</div></div>
+    <div class="stat-card wrong" hidden><div class="num" id="stWrong">0</div><div class="lbl">错题</div></div>
     <div class="stat-card"><div class="num" id="stFav">0</div><div class="lbl">收藏</div></div>
   </div>
 
   <div class="mode-tabs">
     <div class="mode-tab active" data-mode="practice" onclick="setMode('practice')">顺序练习</div>
     <div class="mode-tab" data-mode="random" onclick="setMode('random')">随机刷题</div>
-    <div class="mode-tab" data-mode="wrong" onclick="setMode('wrong')">错题本</div>
     <div class="mode-tab" data-mode="fav" onclick="setMode('fav')">收藏夹</div>
   </div>
 

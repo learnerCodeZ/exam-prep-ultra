@@ -57,8 +57,7 @@
         }
       ],
       "answer": "D",
-      "submitted": "B",
-      "answerNote": "平台提交的是 B。Hello World 未加引号会被当成变量名；正确写法是 print('Hello World')，选 D。"
+      "answerNote": "Hello World 未加引号会被当成变量名；正确写法是 print('Hello World')，选 D。"
     },
     {
       "id": "py_lab1_sc_3",
@@ -255,8 +254,7 @@
         }
       ],
       "answer": "C",
-      "submitted": "B",
-      "answerNote": "平台提交的是 B。print(\"a = \", a) 中逗号会输出一个空格，结果是「a= 27」（题目用 # 表示空格，即 a=#27），选 C。"
+      "answerNote": "print(\"a = \", a) 中逗号会输出一个空格，结果是「a= 27」（题目用 # 表示空格，即 a=#27），选 C。"
     },
     {
       "id": "py_lab1_sc_10",
@@ -998,8 +996,7 @@
         }
       ],
       "answer": "A",
-      "submitted": "D",
-      "answerNote": "平台提交的是 D。count(str2, 10) 从下标 10 开始统计，之后不再出现 \"sql\"，结果为 0，选 A。"
+      "answerNote": "count(str2, 10) 从下标 10 开始统计，之后不再出现 \"sql\"，结果为 0，选 A。"
     },
     {
       "id": "py_lab3_sc_2",
@@ -1224,8 +1221,7 @@
         }
       ],
       "answer": "D",
-      "submitted": "B",
-      "answerNote": "平台提交的是 B。find 从下标 30 开始查找，第二个 \"language\" 位于下标 40，选 D。"
+      "answerNote": "find 从下标 30 开始查找，第二个 \"language\" 位于下标 40，选 D。"
     },
     {
       "id": "py_lab3_sc_10",
@@ -1254,8 +1250,7 @@
         }
       ],
       "answer": "B",
-      "submitted": "A",
-      "answerNote": "平台提交的是 A。split(\" \") 正常返回单词列表，不会报错，选 B。"
+      "answerNote": "split(\" \") 正常返回单词列表，不会报错，选 B。"
     },
     {
       "id": "py_lab3_tf_1",
@@ -1322,7 +1317,7 @@
       "blanks": {
         "1": "会报错：TypeError（字符串不能与整数相加）"
       },
-      "answerNote": "平台提交的是 it's'9，但字符串与整数不能直接相加，执行时会抛出 TypeError。"
+      "answerNote": "字符串与整数不能直接相加，执行时会抛出 TypeError。"
     },
     {
       "id": "py_lab3_prog_1",
@@ -1499,8 +1494,7 @@
         }
       ],
       "answer": "A",
-      "submitted": "B",
-      "answerNote": "平台提交的是 B。列表共 6 个元素，字母序最小是 brown，最大是 tomato，选 A。"
+      "answerNote": "列表共 6 个元素，字母序最小是 brown，最大是 tomato，选 A。"
     },
     {
       "id": "py_lab4_sc_3",
@@ -1529,8 +1523,7 @@
         }
       ],
       "answer": "D",
-      "submitted": "A",
-      "answerNote": "平台提交的是 A。extend 会把 b 的元素追加到 a 末尾，结果是 [1, 3, 2, 4]，选 D。"
+      "answerNote": "extend 会把 b 的元素追加到 a 末尾，结果是 [1, 3, 2, 4]，选 D。"
     },
     {
       "id": "py_lab4_sc_4",
@@ -1615,8 +1608,7 @@
         }
       ],
       "answer": "D",
-      "submitted": "A",
-      "answerNote": "平台提交的是 A。{} 创建的是空字典，type(s) 为 <class 'dict'>，选 D。"
+      "answerNote": "{} 创建的是空字典，type(s) 为 <class 'dict'>，选 D。"
     },
     {
       "id": "py_lab4_sc_7",
@@ -2597,8 +2589,7 @@
         }
       ],
       "answer": "A",
-      "submitted": "C",
-      "answerNote": "平台提交的是 C。split 返回列表，print 输出列表形式，所以结果是 ['1', '2', '3'] is list，选 A。"
+      "answerNote": "split 返回列表，print 输出列表形式，所以结果是 ['1', '2', '3'] is list，选 A。"
     },
     {
       "id": "py_lab6_sc_8",
@@ -2967,8 +2958,7 @@
         }
       ],
       "answer": "D",
-      "submitted": "A",
-      "answerNote": "平台提交的是 A。'abcd' < 'ad' 为 True（第二个字符 b < d）；'Hello' > 'hello' 为 False，选 D。"
+      "answerNote": "'abcd' < 'ad' 为 True（第二个字符 b < d）；'Hello' > 'hello' 为 False，选 D。"
     },
     {
       "id": "py_lab7_sc_4",
@@ -2997,8 +2987,7 @@
         }
       ],
       "answer": "C",
-      "submitted": "D",
-      "answerNote": "平台提交的是 D。elif 是关键字，不能作标识符；_100 是合法标识符，选 C。"
+      "answerNote": "elif 是关键字，不能作标识符；_100 是合法标识符，选 C。"
     },
     {
       "id": "py_lab7_sc_5",
@@ -3067,8 +3056,7 @@
         }
       ],
       "answer": "A",
-      "submitted": "B",
-      "answerNote": "平台提交的是 B。列表比较先看第一个不同元素：3 > 2，所以 [1, 3, 2] > [1, 2, 3] 为 True，选 A。"
+      "answerNote": "列表比较先看第一个不同元素：3 > 2，所以 [1, 3, 2] > [1, 2, 3] 为 True，选 A。"
     },
     {
       "id": "py_lab7_tf_3",
@@ -3325,8 +3313,7 @@
         }
       ],
       "answer": "C",
-      "submitted": "B",
-      "answerNote": "平台提交的是 B。print(i, end=\" \") 会在每个字符后输出一个空格，结果为「P y t h o n 」（末尾还有一个空格），选 C。平台 C、D 两个选项文字相同。"
+      "answerNote": "print(i, end=\" \") 会在每个字符后输出一个空格，结果为「P y t h o n 」（末尾还有一个空格），选 C。平台 C、D 两个选项文字相同。"
     },
     {
       "id": "py_lab8_sc_4",
@@ -3810,8 +3797,7 @@
         }
       ],
       "answer": "C",
-      "submitted": "B",
-      "answerNote": "平台提交的是 B。print(e, end=\",\") 用逗号分隔，结果是 0,1,2,3,4,，选 C。"
+      "answerNote": "print(e, end=\",\") 用逗号分隔，结果是 0,1,2,3,4,，选 C。"
     },
     {
       "id": "py_lab9_sc_4",
@@ -5342,8 +5328,7 @@
         }
       ],
       "answer": "C",
-      "submitted": "A",
-      "answerNote": "平台提交的是 A。单个 CSV 文件只使用一种编码，「CSV 文件通过多种编码表示字符」说法错误，选 C。"
+      "answerNote": "单个 CSV 文件只使用一种编码，「CSV 文件通过多种编码表示字符」说法错误，选 C。"
     },
     {
       "id": "py_lab12_sc_9",

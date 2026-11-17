@@ -5,8 +5,8 @@ const NPOINT_URL = '';
 
 // 内置题库（随仓库发布的 data/ JSON）
 const BUILTIN_BANKS = {
-  default: { name: '大学英语4（默认）', path: 'data/default.json' },
-  'python-programming': { name: 'python程序设计', path: 'data/python-programming.json' },
+  'python-programming': { name: 'Python 程序设计（默认）', path: 'data/python-programming.json' },
+  default: { name: '大学英语4', path: 'data/default.json' },
 };
 const builtinCounts = {};
 
@@ -220,9 +220,7 @@ function renderBankSelect() {
   // 侧栏底部统计
   const stats = document.getElementById('sidebarStats');
   if (stats) {
-    const right = Object.keys(state.right).length;
-    const wrong = Object.keys(state.wrong).length;
-    stats.textContent = `答对 ${right} 道 · 错题 ${wrong} 道 · 共 ${state.questions.length} 题`;
+    stats.textContent = `共 ${state.questions.length} 题`;
   }
 }
 
@@ -647,7 +645,7 @@ function renderFreeFill(q, content) {
       <div class="ff-passage" id="ffPassage">${passage}</div>
       <div class="answer-box show ${state.revealed ? 'correct' : ''}">
         ${state.revealed
-          ? `<span class="label">答案</span> ${answerText}`
+          ? `<span class="label">答案</span> ${answerText}${q.answerNote ? `<div class="answer-note">${escapeHtml(q.answerNote)}</div>` : ''}`
           : '<span class="label">提示</span> 点击“查看答案”或直接点击空格显示答案'}
       </div>
       <div class="actions">
@@ -831,8 +829,6 @@ function openQmap() {
     for (const { item, idx } of group.items) {
       let cls = 'qmap-item';
       if (idx === state.idx) cls += ' current';
-      else if (state.right[item.id]) cls += ' done-right';
-      else if (state.wrong[item.id]) cls += ' done-wrong';
       const label = item.number || idx + 1;
       html += `<div class="${cls}" onclick="jumpTo(${idx})">${label}</div>`;
     }
@@ -878,7 +874,7 @@ function populateImportTarget() {
   const sel = document.getElementById('importTarget');
   const banks = getUserBanks();
   let html = '<option value="__new__">新建题库</option>';
-  html += '<option value="default">大学英语4（默认）</option>';
+  html += '<option value="default">大学英语4</option>';
   for (const b of banks) {
     html += `<option value="${b.id}">${escapeHtml(b.name)}</option>`;
   }
@@ -1296,6 +1292,12 @@ window.addEventListener('auth:logout', () => {
   // 无论是否登录都要渲染用户 UI（登录按钮 / 用户信息）
   updateUserUI();
 
-  const activeId = localStorage.getItem(LS.activeBank) || 'default';
+  let activeId = localStorage.getItem(LS.activeBank);
+  if (!localStorage.getItem('ultra_pythonDefaultSet')) {
+    if (!activeId || activeId === 'default') activeId = 'python-programming';
+    localStorage.setItem(LS.activeBank, activeId);
+    localStorage.setItem('ultra_pythonDefaultSet', '1');
+  }
+  activeId = activeId || 'python-programming';
   await loadBank(activeId);
 })();
